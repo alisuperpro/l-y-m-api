@@ -61,4 +61,21 @@ export class DebtController {
             data: result,
         })
     }
+
+    static async updateStatus(req: Request, res: Response) {
+        const { status, id } = req.body
+
+        const [error, result] = await DebtModel.updateStatus({ status, id })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar la deuda',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
 }
