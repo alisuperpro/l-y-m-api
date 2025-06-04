@@ -85,8 +85,23 @@ export class DebtModel {
                     JOIN
                         clients AS c ON d.client_id = c.id
                     JOIN
-                        employee AS e ON d.created_by = e.id;
+                        employee AS e ON d.created_by = e.id
+                    ORDER BY
+                        d.date DESC;
                 `,
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async updateStatus({ id, status }: { id: string; status: boolean }) {
+        try {
+            const result = await db.execute({
+                sql: `UPDATE ${this.tableName} SET status = ? WHERE id = ?`,
+                args: [status, id],
             })
 
             return [undefined, result.rows]
