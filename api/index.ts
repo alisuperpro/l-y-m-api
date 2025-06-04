@@ -2,6 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
+import { employeeRouter } from '../src/routes/employee'
+import { clientRouter } from '../src/routes/client'
+import { debtRouter } from '../src/routes/debt'
 
 const app = express()
 
@@ -19,6 +22,10 @@ app.use(express.urlencoded({ extended: true }))
 app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
     res.send('hello world')
 })
+
+app.use('/employee', employeeRouter)
+app.use('/client', clientRouter)
+app.use('/debt', debtRouter)
 
 const PORT = process.env.PORT ?? 3500
 
