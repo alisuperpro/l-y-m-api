@@ -7,3 +7,5 @@ debtRouter.get('/getAllDebtInfo', DebtController.getAllDebtWithAllInfo)
 debtRouter.get('/:id', DebtController.getById)
 
 debtRouter.post('/add', DebtController.add)
+
+debtRouter.put('/updateStatus', DebtController.updateStatus)
