@@ -11,6 +11,24 @@ export class EmployeeController {
 
         const created_at = new Date().toISOString()
 
+        const [errorUser, findUser] = await EmployeeModel.findByUsername({
+            username,
+        })
+
+        if (errorUser) {
+            res.status(500).json({
+                error: 'Error al buscar el usuario',
+            })
+            return
+        }
+
+        if (findUser.length > 0) {
+            res.status(403).json({
+                error: 'Ye existe el usuario',
+            })
+            return
+        }
+
         const saltRounds = 10 // SaltRound to encrypt password
         // const salt = await genSalt(saltRounds); // Generate Salt
         hash(password, saltRounds, async (err, hash) => {
@@ -48,6 +66,13 @@ export class EmployeeController {
 
         const [error, result] = await EmployeeModel.findEmployeeById({ id })
 
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'No encontrado',
+            })
+            return
+        }
+
         if (error) {
             res.status(500).json({
                 error: 'Error al guardar la informacion',
@@ -66,6 +91,63 @@ export class EmployeeController {
         if (error) {
             res.status(500).json({
                 error: 'Error al guardar la informacion',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
+    static async findByUsername(req: Request, res: Response) {
+        const { user } = req.query
+
+        if (user === undefined) {
+            res.status(403).json({
+                error: 'Falta el usuario',
+            })
+            return
+        }
+        const [error, result] = await EmployeeModel.findByUsername({
+            //@ts-ignore
+            username: user,
+        })
+
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'Usuario no encontrado',
+            })
+            return
+        }
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar el usuario',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
+    static async delete(req: Request, res: Response) {
+        const { id } = req.body
+
+        if (!id) {
+            res.status(403).json({
+                error: 'Falta el id',
+            })
+            return
+        }
+
+        const [error, result] = await EmployeeModel.delete({ id })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al borrar el empleado',
             })
             return
         }
