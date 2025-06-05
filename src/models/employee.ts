@@ -72,4 +72,30 @@ export class EmployeeModel {
             return [err]
         }
     }
+
+    static async findByUsername({ username }: { username: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE username = ?`,
+                args: [username],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async delete({ id }: { id: string }) {
+        try {
+            const result = await db.execute({
+                sql: `DELETE FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
 }
