@@ -8,31 +8,28 @@ export class EmployeeModel {
         name,
         username,
         password,
-        role,
-        permission_id,
-        department,
+        roleId,
+        departmentId,
         created_at,
     }: {
         name: string
         username: string
         password: string
-        role: string
-        permission_id: string
-        department: string
+        roleId: string
+        departmentId: string
         created_at: string
     }) {
         const id = randomUUID()
         try {
             await db.execute({
-                sql: `INSERT INTO ${this.tableName} (id, name, username, password, role_id, permission_id, department, created_at) VALUES (?,?,?,?,?,?,?,?)`,
+                sql: `INSERT INTO ${this.tableName} (id, name, username, password, role_id, department_id, created_at) VALUES (?,?,?,?,?,?,?)`,
                 args: [
                     id,
                     name,
                     username,
                     password,
-                    role,
-                    permission_id,
-                    department,
+                    roleId,
+                    departmentId,
                     created_at,
                 ],
             })

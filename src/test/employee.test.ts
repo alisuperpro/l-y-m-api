@@ -5,9 +5,8 @@ const employeeTest = {
     name: 'Test',
     username: 'test',
     password: '123456789',
-    role: 'cobrador',
-    permission_id: 'dfoijdofds',
-    department: 'cobranza',
+    roleId: 'cobrador',
+    departmentId: 'dfoijdofds',
 }
 
 describe('Test the employee path', () => {

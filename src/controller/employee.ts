@@ -7,8 +7,7 @@ dotenv.config()
 
 export class EmployeeController {
     static async add(req: Request, res: Response) {
-        const { name, username, password, role, permission_id, department } =
-            req.body
+        const { name, username, password, roleId, departmentId } = req.body
 
         const created_at = new Date().toISOString()
 
@@ -42,9 +41,8 @@ export class EmployeeController {
                 name,
                 username,
                 password: hash,
-                role,
-                permission_id,
-                department,
+                roleId,
+                departmentId,
                 created_at,
             })
 
