@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import { employeeRouter } from '../src/routes/employee'
 import { clientRouter } from '../src/routes/client'
 import { debtRouter } from '../src/routes/debt'
+import cookieParser from 'cookie-parser'
 
 const app = express()
 
@@ -18,6 +19,7 @@ app.use(cors(corsOptions))
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 
 app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
     res.send('hello world')
