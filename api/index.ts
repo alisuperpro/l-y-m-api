@@ -7,6 +7,8 @@ import { clientRouter } from '../src/routes/client'
 import { debtRouter } from '../src/routes/debt'
 import cookieParser from 'cookie-parser'
 import { permisionRouter } from '../src/routes/permission'
+import { roleRouter } from '../src/routes/role'
+import { rolePermissionRouter } from '../src/routes/rolePermission'
 
 const app = express()
 
@@ -30,6 +32,8 @@ app.use('/employee', employeeRouter)
 app.use('/client', clientRouter)
 app.use('/debt', debtRouter)
 app.use('/permission', permisionRouter)
+app.use('/role', roleRouter)
+app.use('/role-permission', rolePermissionRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500
