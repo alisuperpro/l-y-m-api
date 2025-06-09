@@ -6,6 +6,7 @@ import { employeeRouter } from '../src/routes/employee'
 import { clientRouter } from '../src/routes/client'
 import { debtRouter } from '../src/routes/debt'
 import cookieParser from 'cookie-parser'
+import { permisionRouter } from '../src/routes/permission'
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
 app.use('/employee', employeeRouter)
 app.use('/client', clientRouter)
 app.use('/debt', debtRouter)
+app.use('/permission', permisionRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500
