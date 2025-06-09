@@ -1,7 +1,8 @@
 import { type Request, type Response } from 'express'
 import dotenv from 'dotenv'
 import { EmployeeModel } from '../models/employee'
-import { hash } from 'bcrypt'
+import { hash, compare } from 'bcrypt'
+import jwt from 'jsonwebtoken'
 dotenv.config()
 
 export class EmployeeController {
@@ -130,6 +131,55 @@ export class EmployeeController {
 
         res.json({
             data: result,
+        })
+    }
+
+    static async login(req: Request, res: Response) {
+        const { username, password } = req.body
+
+        const [error, result] = await EmployeeModel.findByUsername({ username })
+
+        if (error) {
+            res.status(500).json({
+                error: 'error al buscar el usuario',
+            })
+            return
+        }
+
+        if (result.length === 0) {
+            res.status(403).json({
+                error: 'Usuario y/o contraseña invalido',
+            })
+            return
+        }
+
+        const comparedPassword = await compare(password, result[0].password)
+
+        if (comparedPassword) {
+            const token = jwt.sign(
+                { user: result[0] },
+                process.env.JWT_KEY ?? '',
+                {
+                    expiresIn: '1d',
+                }
+            )
+
+            res.cookie('access_token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+            }).json({
+                data: result,
+            })
+        } else {
+            res.status(403).json({
+                error: 'Usuario y/o contraseña invalido',
+            })
+        }
+    }
+
+    static async logout(req: Request, res: Response) {
+        res.clearCookie('access_token').json({
+            message: 'logout',
         })
     }
 
