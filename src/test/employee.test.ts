@@ -42,9 +42,20 @@ describe('Employee API Tests', () => {
 
     describe('POST /employee/add', () => {
         test('debería crear un nuevo empleado exitosamente', async () => {
-            const res = await request(app)
-                .post('/employee/add')
-                .send(employeeTest)
+            const departmentData = {
+                name: 'Recursos Humanos',
+            }
+
+            // Crear el departamento por primera vez
+            await request(app).post('/departments/add').send(departmentData)
+            const dep = await request(app).get('/departments/')
+
+            const e = {
+                ...employeeTest,
+                departmentId: dep.body.data[0].id,
+            }
+
+            const res = await request(app).post('/employee/add').send(e)
 
             expect(res.statusCode).toBe(200)
             expect(res.body.data).toBeTruthy()
