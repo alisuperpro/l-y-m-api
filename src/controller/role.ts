@@ -5,6 +5,19 @@ export class RoleController {
     static async add(req: Request, res: Response) {
         const { name, description } = req.body
 
+        const [findError, findName] = await RoleModel.findByName({ name })
+        if (findName) {
+            res.status(403).json({ error: 'El rol ya existe' })
+            return
+        }
+
+        if (findError) {
+            res.status(500).json({
+                error: 'error al guardar el rol',
+            })
+            return
+        }
+
         const [error, result] = await RoleModel.add({ name, description })
 
         if (error) {
@@ -29,8 +42,31 @@ export class RoleController {
             return
         }
 
+        if (result.length === 0) {
+            res.status(404).json({ error: 'No hay roles' })
+            return
+        }
+
         res.json({
             data: result,
         })
+    }
+
+    static async findById(req: Request, res: Response) {
+        const { id } = req.params
+
+        const [error, result] = await RoleModel.findById({ id })
+
+        if (error) {
+            res.status(500).json({ error: 'Error al buscar el rol' })
+            return
+        }
+
+        if (!result) {
+            res.status(404).json({ error: 'El rol no existe' })
+            return
+        }
+
+        res.json({ data: result })
     }
 }

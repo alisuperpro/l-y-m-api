@@ -46,7 +46,20 @@ export class RoleModel {
         try {
             const result = await db.execute(`SELECT * FROM ${this.tableName}`)
 
-            return [undefined, result]
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async findByName({ name }: { name: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE name = ?`,
+                args: [name],
+            })
+
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
