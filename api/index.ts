@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser'
 import { permisionRouter } from '../src/routes/permission'
 import { roleRouter } from '../src/routes/role'
 import { rolePermissionRouter } from '../src/routes/rolePermission'
+import { departmentsRouter } from '../src/routes/departments'
 
 const app = express()
 
@@ -34,6 +35,7 @@ app.use('/debt', debtRouter)
 app.use('/permission', permisionRouter)
 app.use('/role', roleRouter)
 app.use('/role-permission', rolePermissionRouter)
+app.use('/departments', departmentsRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500
