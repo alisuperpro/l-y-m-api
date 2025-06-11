@@ -49,10 +49,12 @@ describe('Employee API Tests', () => {
             // Crear el departamento por primera vez
             await request(app).post('/departments/add').send(departmentData)
             const dep = await request(app).get('/departments/')
+            const role = await request(app).get('/role/')
 
             const e = {
                 ...employeeTest,
                 departmentId: dep.body.data[0].id,
+                roleId: role.body.data[0].id,
             }
 
             const res = await request(app).post('/employee/add').send(e)

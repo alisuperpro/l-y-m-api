@@ -19,6 +19,13 @@ describe('Role API', () => {
             expect(response.status).toBe(200)
             expect(response.body.data).toHaveProperty('id')
         })
+
+        it('debería retornar un error si el rol ya existe', async () => {
+            await request(app).post('/role/add').send(roleData)
+            const response = await request(app).post('/role/add').send(roleData)
+            expect(response.status).toBe(403)
+            expect(response.body.error).toBe('El rol ya existe')
+        })
     })
 
     describe('GET /role', () => {

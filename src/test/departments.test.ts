@@ -20,8 +20,6 @@ describe('Departments API', () => {
                 .post('/departments/add')
                 .send(departmentData)
 
-            console.log(response.body)
-
             expect(response.status).toBe(200)
             expect(response.body.data).toHaveProperty('id')
             expect(response.body.data.name).toBe(departmentData.name)
