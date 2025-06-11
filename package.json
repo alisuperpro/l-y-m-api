@@ -6,7 +6,7 @@
     "scripts": {
         "start": "node ./dist/server.js",
         "dev": "cross-env NODE_ENV=development nodemon ./api/index.ts",
-        "test": "cross-env NODE_ENV=test jest",
+        "test": "cross-env NODE_ENV=test jest --runInBand",
         "test:watch": "jest --watch",
         "build": "tsc"
     },
@@ -26,6 +26,7 @@
     },
     "devDependencies": {
         "@eslint/js": "9.28.0",
+        "@jest/test-sequencer": "^30.0.0",
         "@types/bcrypt": "^5.0.2",
         "@types/cookie-parser": "^1.4.9",
         "@types/cors": "2.8.18",

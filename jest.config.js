@@ -6,4 +6,5 @@ module.exports = {
     // detectOpenHandles: true,
     testTimeout: 15000,
     forceExit: true,
+    testSequencer: './testSequenzer.js',
 }
