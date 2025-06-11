@@ -5,68 +5,115 @@ const employeeTest = {
     name: 'Test',
     username: 'test',
     password: '123456789',
-    roleId: 'cobrador',
-    departmentId: 'dfoijdofds',
+    roleId: 'role_1',
+    departmentId: 'dep_1',
 }
 
-describe('Test the employee path', () => {
-    test('test /username path missing query', async () => {
-        const res = await request(app).get('/employee/username')
+describe('Employee API Tests', () => {
+    describe('GET /employee', () => {
+        test('debería obtener todos los empleados', async () => {
+            const res = await request(app).get('/employee/')
 
-        expect(res.statusCode).toBe(403)
-        expect(res.body.data).toBeFalsy()
-        expect(res.body.error).toBeTruthy()
+            expect(res.statusCode).toBe(200)
+            expect(res.body.data).toBeTruthy()
+            expect(Array.isArray(res.body.data)).toBe(true)
+        })
     })
 
-    test('test /username path user not exist on db', async () => {
-        const res = await request(app)
-            .get('/employee/username')
-            .query({ user: employeeTest.username })
+    describe('GET /employee/username', () => {
+        test('debería retornar 403 cuando falta el parámetro user', async () => {
+            const res = await request(app).get('/employee/username')
 
-        expect(res.statusCode).toBe(404)
-        expect(res.body.data).toBeFalsy()
-        expect(res.body.error).toBeTruthy()
+            expect(res.statusCode).toBe(403)
+            expect(res.body.data).toBeFalsy()
+            expect(res.body.error).toBe('Falta el usuario')
+        })
+
+        test('debería retornar 404 cuando el usuario no existe', async () => {
+            const res = await request(app)
+                .get('/employee/username')
+                .query({ user: 'usuario_inexistente' })
+
+            expect(res.statusCode).toBe(404)
+            expect(res.body.data).toBeFalsy()
+            expect(res.body.error).toBe('Usuario no encontrado')
+        })
     })
 
-    test('test /add path', async () => {
-        const res = await request(app).post('/employee/add').send(employeeTest)
+    describe('POST /employee/add', () => {
+        test('debería crear un nuevo empleado exitosamente', async () => {
+            const res = await request(app)
+                .post('/employee/add')
+                .send(employeeTest)
 
-        expect(res.statusCode).toBe(200)
-        expect(res.body.data).toBeTruthy()
+            expect(res.statusCode).toBe(200)
+            expect(res.body.data).toBeTruthy()
+            expect(res.body.data).toHaveProperty('id')
+        })
+
+        test('debería retornar 403 al intentar crear un usuario duplicado', async () => {
+            const res = await request(app)
+                .post('/employee/add')
+                .send(employeeTest)
+
+            expect(res.statusCode).toBe(403)
+            expect(res.body.error).toBe('Ye existe el usuario')
+        })
     })
 
-    test('test / path should response with all employee data', async () => {
-        const res = await request(app).get('/employee/')
+    describe('POST /employee/login', () => {
+        test('debería hacer login exitosamente', async () => {
+            const res = await request(app).post('/employee/login').send({
+                username: employeeTest.username,
+                password: employeeTest.password,
+            })
 
-        expect(res.statusCode).toBe(200)
-        expect(res.body.data).toBeTruthy()
+            expect(res.statusCode).toBe(200)
+            expect(res.body.data).toBeTruthy()
+            expect(res.headers['set-cookie']).toBeTruthy()
+        })
+
+        test('debería retornar 403 con credenciales inválidas', async () => {
+            const res = await request(app).post('/employee/login').send({
+                username: employeeTest.username,
+                password: 'password_incorrecto',
+            })
+
+            expect(res.statusCode).toBe(403)
+            expect(res.body.error).toBe('Usuario y/o contraseña invalido')
+        })
     })
 
-    test('test /add test username', async () => {
-        const res = await request(app).post('/employee/add').send(employeeTest)
+    describe('POST /employee/logout', () => {
+        test('debería hacer logout exitosamente', async () => {
+            const res = await request(app).post('/employee/logout')
 
-        expect(res.statusCode).toBe(403)
-        expect(res.body.error).toBeTruthy()
+            expect(res.statusCode).toBe(200)
+            expect(res.body.message).toBe('logout')
+            expect(res.headers['set-cookie']).toBeTruthy()
+        })
     })
 
-    test('test /username path user exist on db', async () => {
-        const res = await request(app)
-            .get('/employee/username')
-            .query({ user: employeeTest.username })
+    describe('DELETE /employee', () => {
+        test('debería eliminar un empleado exitosamente', async () => {
+            // Primero obtenemos el ID del empleado
+            const resUser = await request(app)
+                .get('/employee/username')
+                .query({ user: employeeTest.username })
 
-        expect(res.statusCode).toBe(200)
-        expect(res.body).toBeTruthy()
-    })
+            const res = await request(app)
+                .delete('/employee/')
+                .send({ id: resUser.body.data.id })
 
-    test('test delete user', async () => {
-        const resUser = await request(app)
-            .get('/employee/username')
-            .query({ user: employeeTest.username })
+            expect(res.statusCode).toBe(200)
+            expect(res.body.data).toBeTruthy()
+        })
 
-        const res = await request(app)
-            .delete('/employee/')
-            .send({ id: resUser.body.data[0].id })
+        test('debería retornar 403 cuando falta el ID', async () => {
+            const res = await request(app).delete('/employee/').send({})
 
-        expect(res.statusCode).toBe(200)
+            expect(res.statusCode).toBe(403)
+            expect(res.body.error).toBe('Falta el id')
+        })
     })
 })

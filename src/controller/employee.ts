@@ -21,8 +21,7 @@ export class EmployeeController {
             })
             return
         }
-
-        if (findUser.length > 0) {
+        if (findUser !== undefined) {
             res.status(403).json({
                 error: 'Ye existe el usuario',
             })
@@ -113,7 +112,7 @@ export class EmployeeController {
             username: user,
         })
 
-        if (result.length === 0) {
+        if (!result) {
             res.status(404).json({
                 error: 'Usuario no encontrado',
             })
@@ -144,18 +143,18 @@ export class EmployeeController {
             return
         }
 
-        if (result.length === 0) {
+        if (!result) {
             res.status(403).json({
                 error: 'Usuario y/o contraseña invalido',
             })
             return
         }
 
-        const comparedPassword = await compare(password, result[0].password)
+        const comparedPassword = await compare(password, result.password)
 
         if (comparedPassword) {
             const token = jwt.sign(
-                { user: result[0] },
+                { user: result },
                 process.env.JWT_KEY ?? '',
                 {
                     expiresIn: '1d',

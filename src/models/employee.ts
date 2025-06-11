@@ -39,7 +39,7 @@ export class EmployeeModel {
                 args: [id],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
@@ -77,7 +77,7 @@ export class EmployeeModel {
                 args: [username],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
