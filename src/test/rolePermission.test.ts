@@ -93,7 +93,7 @@ describe('Role Permission API', () => {
 
             const id = roleId.body.data[0].id
             const response = await request(app).get(
-                `/role-permission/role/${roleId.body.data[0].id}`
+                `/role-permission/role/${id}`
             )
             expect(response.status).toBe(200)
             expect(response.body.data).toHaveLength(1)
@@ -106,7 +106,7 @@ describe('Role Permission API', () => {
             const id = permissionId.body.data[0].id
 
             const response = await request(app).get(
-                `/role-permission/permission/${permissionId.body.data[0].id}`
+                `/role-permission/permission/${id}`
             )
             expect(response.status).toBe(200)
             expect(response.body.data).toHaveLength(1)
