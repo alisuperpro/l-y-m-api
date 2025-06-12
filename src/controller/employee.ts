@@ -9,6 +9,13 @@ export class EmployeeController {
     static async add(req: Request, res: Response) {
         const { name, username, password, roleId, departmentId } = req.body
 
+        if (!name || !username || !password || !roleId || !departmentId) {
+            res.status(403).json({
+                error: 'Faltan datos requeridos',
+            })
+            return
+        }
+
         const created_at = new Date().toISOString()
 
         const [errorUser, findUser] = await EmployeeModel.findByUsername({
@@ -23,7 +30,7 @@ export class EmployeeController {
         }
         if (findUser !== undefined) {
             res.status(403).json({
-                error: 'Ye existe el usuario',
+                error: 'Ya existe el usuario',
             })
             return
         }
@@ -89,6 +96,13 @@ export class EmployeeController {
         if (error) {
             res.status(500).json({
                 error: 'Error al guardar la informacion',
+            })
+            return
+        }
+
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'No se encontraron empleados',
             })
             return
         }
@@ -186,6 +200,22 @@ export class EmployeeController {
         if (!id) {
             res.status(403).json({
                 error: 'Falta el id',
+            })
+            return
+        }
+
+        const [error2, result2] = await EmployeeModel.findEmployeeById({ id })
+
+        if (error2) {
+            res.status(500).json({
+                error: 'Error al buscar el empleado',
+            })
+            return
+        }
+
+        if (result2.length === 0) {
+            res.status(404).json({
+                error: 'Empleado no encontrado',
             })
             return
         }
