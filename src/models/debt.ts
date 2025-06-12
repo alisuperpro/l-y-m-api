@@ -19,7 +19,7 @@ export class DebtModel {
         description: string | null
         createdBy: string
         date: string
-        status: boolean
+        status: string
     }) {
         const id = randomUUID()
 
@@ -43,7 +43,7 @@ export class DebtModel {
                 args: [id],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
@@ -56,7 +56,7 @@ export class DebtModel {
                 args: [id],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
@@ -79,7 +79,7 @@ export class DebtModel {
                         e.id AS employee_id,
                         e.name AS employee_name,
                         e.username AS employee_username,
-                        e.department AS employee_department
+                        e.department_id AS employee_department_id
                     FROM
                         ${this.tableName} AS d
                     JOIN
@@ -97,14 +97,19 @@ export class DebtModel {
         }
     }
 
-    static async updateStatus({ id, status }: { id: string; status: boolean }) {
+    static async updateStatus({ id, status }: { id: string; status: string }) {
         try {
-            const result = await db.execute({
+            await db.execute({
                 sql: `UPDATE ${this.tableName} SET status = ? WHERE id = ?`,
                 args: [status, id],
             })
 
-            return [undefined, result.rows]
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
