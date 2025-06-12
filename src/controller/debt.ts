@@ -42,6 +42,13 @@ export class DebtController {
             return
         }
 
+        if (!result) {
+            res.status(404).json({
+                error: 'No se encontró la deuda',
+            })
+            return
+        }
+
         res.json({
             data: result,
         })
@@ -49,6 +56,13 @@ export class DebtController {
 
     static async getAllDebtWithAllInfo(req: Request, res: Response) {
         const [error, result] = await DebtModel.getAllDebtWithAllInfo()
+
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'No se encontraron deudas',
+            })
+            return
+        }
 
         if (error) {
             res.status(500).json({
@@ -65,8 +79,22 @@ export class DebtController {
     static async updateStatus(req: Request, res: Response) {
         const { status, id } = req.body
 
-        const [error, result] = await DebtModel.updateStatus({ status, id })
+        const [findError, findResult] = await DebtModel.findById({ id })
 
+        if (findError) {
+            res.status(500).json({
+                error: 'Error al buscar la deuda',
+            })
+            return
+        }
+
+        if (!findResult) {
+            res.status(404).json({
+                error: 'No se encontró la deuda',
+            })
+            return
+        }
+        const [error, result] = await DebtModel.updateStatus({ status, id })
         if (error) {
             res.status(500).json({
                 error: 'Error al buscar la deuda',
