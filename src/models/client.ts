@@ -28,7 +28,7 @@ export class ClientModel {
                 args: [id],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
@@ -41,7 +41,7 @@ export class ClientModel {
                 args: [id],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
@@ -52,6 +52,18 @@ export class ClientModel {
             const result = await db.execute(`SELECT * FROM ${this.tableName}`)
 
             return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async findByUsername({ username }: { username: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE username = ?`,
+                args: [username],
+            })
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
