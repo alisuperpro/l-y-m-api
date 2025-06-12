@@ -30,7 +30,7 @@ app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
 })
 
 app.use('/employee', employeeRouter)
-app.use('/client', clientRouter)
+app.use('/clients', clientRouter)
 app.use('/debt', debtRouter)
 app.use('/permission', permisionRouter)
 app.use('/role', roleRouter)
