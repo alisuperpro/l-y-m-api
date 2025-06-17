@@ -11,6 +11,7 @@ import { roleRouter } from '../src/routes/role'
 import { rolePermissionRouter } from '../src/routes/rolePermission'
 import { departmentsRouter } from '../src/routes/departments'
 import { payRouter } from '../src/routes/pay'
+import { resourcesRouter } from '../src/routes/resources'
 
 const app = express()
 
@@ -38,6 +39,7 @@ app.use('/role', roleRouter)
 app.use('/role-permission', rolePermissionRouter)
 app.use('/departments', departmentsRouter)
 app.use('/pay', payRouter)
+app.use('/resources', resourcesRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500
