@@ -56,4 +56,16 @@ describe('Permission', () => {
         expect(response.body.data[0].actions_id).toBe(permission.actionsId)
         expect(response.body.data[0].description).toBe(permission.description)
     })
+
+    it('get by id', async () => {
+        const res = await request(app).post('/permission/add').send(permission)
+        const response = await request(app).get(
+            `/permission/${res.body.data.id}`
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.body.data.resources_id).toBe(permission.resourcesId)
+        expect(response.body.data.actions_id).toBe(permission.actionsId)
+        expect(response.body.data.description).toBe(permission.description)
+    })
 })
