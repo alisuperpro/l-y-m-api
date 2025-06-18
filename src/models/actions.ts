@@ -15,7 +15,11 @@ export class ActionsModel {
         try {
             await db.execute({
                 sql: `INSERT INTO ${this.tableName} (id, name, description) VALUES (?, ?, ?)`,
-                args: [id, name, description],
+                args: [
+                    id,
+                    name,
+                    description === undefined ? null : description,
+                ],
             })
 
             const result = await db.execute({
