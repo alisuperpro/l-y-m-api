@@ -4,18 +4,25 @@ import { randomUUID } from 'node:crypto'
 export class PermissionModel {
     static tableName = 'permission'
     static async add({
-        name,
+        resourcesId,
+        actionsId,
         description,
     }: {
-        name: string
-        description: string | null
+        resourcesId: string
+        actionsId: string
+        description: string
     }) {
         try {
             const id = randomUUID()
 
             await db.execute({
-                sql: `INSERT INTO ${this.tableName} (id, name, description) VALUES (?, ?, ?)`,
-                args: [id, name, description],
+                sql: `INSERT INTO ${this.tableName} (id, resources_id, actions_id, description) VALUES (?, ?, ?, ?)`,
+                args: [
+                    id,
+                    resourcesId,
+                    actionsId,
+                    description === undefined ? null : description,
+                ],
             })
 
             const [error, result] = await this.findById({ id })
