@@ -57,4 +57,17 @@ export class ActionsModel {
             return [error]
         }
     }
+
+    static async getByName({ name }: { name: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE name = ?`,
+                args: [name],
+            })
+
+            return [undefined, result.rows]
+        } catch (error) {
+            return [error]
+        }
+    }
 }
