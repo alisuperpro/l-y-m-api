@@ -57,4 +57,17 @@ export class PermissionModel {
             return [err]
         }
     }
+
+    static async findByResourcesId({ resourcesId }: { resourcesId: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE resources_id = ?`,
+                args: [resourcesId],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
 }
