@@ -13,6 +13,7 @@ import { departmentsRouter } from '../src/routes/departments'
 import { payRouter } from '../src/routes/pay'
 import { resourcesRouter } from '../src/routes/resources'
 import { actionsRouter } from '../src/routes/actions'
+import { routePermissionMapRouter } from '../src/routes/routePermissionMAp'
 
 const app = express()
 
@@ -42,6 +43,7 @@ app.use('/departments', departmentsRouter)
 app.use('/pay', payRouter)
 app.use('/resources', resourcesRouter)
 app.use('/actions', actionsRouter)
+app.use('/route-permission-map', routePermissionMapRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500
