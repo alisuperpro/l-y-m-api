@@ -12,6 +12,7 @@ export class RoutePermissionMapController {
         })
 
         if (error) {
+            console.log(error)
             res.status(500).json({ error: 'Error adding route permission map' })
             return
         }

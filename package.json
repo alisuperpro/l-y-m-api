@@ -22,6 +22,7 @@
         "express": "5.1.0",
         "jsonwebtoken": "9.0.2",
         "morgan": "1.10.0",
+        "nodemailer": "^7.0.4",
         "zod": "3.25.63"
     },
     "devDependencies": {
@@ -33,6 +34,7 @@
         "@types/jest": "29.5.14",
         "@types/jsonwebtoken": "^9.0.9",
         "@types/morgan": "1.9.10",
+        "@types/nodemailer": "^6.4.17",
         "@types/supertest": "^6.0.3",
         "cross-env": "^7.0.3",
         "eslint": "9.28.0",
@@ -46,5 +48,13 @@
         "ts-node": "10.9.2",
         "typescript": "5.8.3",
         "typescript-eslint": "8.34.0"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/alisuperpro/l-y-m-api.git"
+    },
+    "bugs": {
+        "url": "https://github.com/alisuperpro/l-y-m-api/issues"
+    },
+    "homepage": "https://github.com/alisuperpro/l-y-m-api#readme"
 }

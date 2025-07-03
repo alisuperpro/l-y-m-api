@@ -7,7 +7,7 @@ export class setRoutePermission {
         res: Response,
         next: NextFunction
     ) {
-        const path = `${req.baseUrl}${req.path}`
+        const path = `${req.baseUrl}${req.route.path}`
         const [error, result] = await RoutePermissionMapModel.getByRoutePath({
             routePath: path,
         })

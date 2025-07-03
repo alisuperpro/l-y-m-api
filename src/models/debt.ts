@@ -10,7 +10,6 @@ export class DebtModel {
         createdAt,
         description,
         createdBy,
-        date,
         status,
     }: {
         amount: number
@@ -18,14 +17,13 @@ export class DebtModel {
         createdAt: string
         description: string | null
         createdBy: string
-        date: string
         status: string
     }) {
         const id = randomUUID()
 
         try {
             await db.execute({
-                sql: `INSERT INTO ${this.tableName} (id, amount, client_id, created_at, description, created_by, date, status) VALUES (?,?,?,?,?,?,?,?)`,
+                sql: `INSERT INTO ${this.tableName} (id, amount, client_id, created_at, description, created_by, status) VALUES (?,?,?,?,?,?,?,?)`,
                 args: [
                     id,
                     amount,
@@ -33,7 +31,6 @@ export class DebtModel {
                     createdAt,
                     description,
                     createdBy,
-                    date,
                     status,
                 ],
             })
@@ -52,7 +49,27 @@ export class DebtModel {
     static async findById({ id }: { id: string }) {
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
+                sql: `SELECT
+                        d.id AS debt_id,
+                        d.amount,
+                        d.description AS debt_description,
+                        d.created_at AS debt_created_at,
+                        d.date AS due_date,
+                        c.name AS client_name,
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
+                    FROM
+                        "debt" d
+                    JOIN
+                        "clients" c ON d.client_id = c.id
+                    JOIN
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                    WHERE d.id = ? 
+                    ORDER BY d.created_at
+                    DESC
+                    ;`,
                 args: [id],
             })
 
@@ -62,7 +79,40 @@ export class DebtModel {
         }
     }
 
-    static async getAllDebtWithAllInfo() {
+    static async findByStatus({ status }: { status: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT
+                        d.id AS debt_id,
+                        d.amount,
+                        d.description AS debt_description,
+                        d.created_at AS debt_created_at,
+                        d.date AS due_date,
+                        c.name AS client_name,
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
+                    FROM
+                        "debt" d
+                    JOIN
+                        "clients" c ON d.client_id = c.id
+                    JOIN
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                    WHERE s.state = ? 
+                    ORDER BY d.created_at
+                    DESC
+                    ;`,
+                args: [status],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async getAllDebtWithAllInfo({ clientId }: { clientId: string }) {
         try {
             const result = await db.execute({
                 sql: `
@@ -71,24 +121,24 @@ export class DebtModel {
                         d.amount,
                         d.description AS debt_description,
                         d.created_at AS debt_created_at,
-                        d.date AS debt_date,
-                        d.status AS debt_status,
-                        c.id AS client_id,
+                        d.date AS due_date,
                         c.name AS client_name,
-                        c.username AS client_username,
-                        e.id AS employee_id,
-                        e.name AS employee_name,
-                        e.username AS employee_username,
-                        e.department_id AS employee_department_id
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
                     FROM
-                        ${this.tableName} AS d
+                        "debt" d
                     JOIN
-                        clients AS c ON d.client_id = c.id
+                        "clients" c ON d.client_id = c.id
                     JOIN
-                        employee AS e ON d.created_by = e.id
-                    ORDER BY
-                        d.date DESC;
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                    WHERE d.client_id = ? 
+                    ORDER BY d.created_at
+                    DESC
+                    ;
                 `,
+                args: [clientId],
             })
 
             return [undefined, result.rows]

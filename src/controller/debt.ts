@@ -1,10 +1,17 @@
 import { Request, Response } from 'express'
 import { DebtModel } from '../models/debt'
+import { CanApproveOtherDebtsModel } from '../models/canApproveOtherDebts'
 
 export class DebtController {
     static async add(req: Request, res: Response) {
-        const { amount, clientId, createdBy, date, description, status } =
-            req.body
+        const { amount, clientId, createdBy, description, status } = req.body
+
+        if (!amount || !clientId || !createdBy || !status) {
+            res.status(400).json({
+                error: 'Faltan datos',
+            })
+            return
+        }
 
         const createdAt = new Date().toISOString()
 
@@ -13,7 +20,6 @@ export class DebtController {
             clientId,
             createdAt,
             createdBy,
-            date,
             description: description === undefined ? null : description,
             status,
         })
@@ -55,7 +61,11 @@ export class DebtController {
     }
 
     static async getAllDebtWithAllInfo(req: Request, res: Response) {
-        const [error, result] = await DebtModel.getAllDebtWithAllInfo()
+        //@ts-ignore
+        const { user } = req.session
+        const [error, result] = await DebtModel.getAllDebtWithAllInfo({
+            clientId: user.id,
+        })
 
         if (result.length === 0) {
             res.status(404).json({
@@ -77,9 +87,11 @@ export class DebtController {
     }
 
     static async updateStatus(req: Request, res: Response) {
-        const { status, id } = req.body
+        //@ts-ignore
+        const { user } = req.session
+        const { status, debtId } = req.body
 
-        const [findError, findResult] = await DebtModel.findById({ id })
+        const [findError, findResult] = await DebtModel.findById({ id: debtId })
 
         if (findError) {
             res.status(500).json({
@@ -94,16 +106,55 @@ export class DebtController {
             })
             return
         }
-        const [error, result] = await DebtModel.updateStatus({ status, id })
-        if (error) {
-            res.status(500).json({
-                error: 'Error al buscar la deuda',
-            })
-            return
-        }
 
-        res.json({
-            data: result,
-        })
+        if (findResult.createdBy !== user.id) {
+            const [approveError, approveResult] =
+                await CanApproveOtherDebtsModel.findByCreatorId({
+                    creatorId: user.id,
+                })
+
+            if (approveError) {
+                res.status(500).json({
+                    error: 'Error al buscar los permisos para aprovar otras deudas',
+                })
+                return
+            }
+            if (approveResult.length === 0) {
+                res.status(403).json({
+                    error: 'No tienes permisos para aprobar esta deuda',
+                })
+                return
+            } else {
+                const [error, result] = await DebtModel.updateStatus({
+                    status,
+                    id: debtId,
+                })
+                if (error) {
+                    res.status(500).json({
+                        error: 'Error al buscar la deuda',
+                    })
+                    return
+                }
+
+                res.json({
+                    data: result,
+                })
+            }
+        } else {
+            const [error, result] = await DebtModel.updateStatus({
+                status,
+                id: debtId,
+            })
+            if (error) {
+                res.status(500).json({
+                    error: 'Error al buscar la deuda',
+                })
+                return
+            }
+
+            res.json({
+                data: result,
+            })
+        }
     }
 }

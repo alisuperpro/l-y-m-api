@@ -13,7 +13,14 @@ import { departmentsRouter } from '../src/routes/departments'
 import { payRouter } from '../src/routes/pay'
 import { resourcesRouter } from '../src/routes/resources'
 import { actionsRouter } from '../src/routes/actions'
-import { routePermissionMapRouter } from '../src/routes/routePermissionMAp'
+import { routePermissionMapRouter } from '../src/routes/routePermissionMap'
+import { userPermissionRouter } from '../src/routes/userPermission'
+import { statesRouter } from '../src/routes/states'
+import { organizationsRouter } from '../src/routes/organizations'
+import { clientDocumentsRouter } from '../src/routes/clientDocuments'
+import { clientCompanyRouter } from '../src/routes/clientCompany'
+import { setupEmailService } from '../src/events/email.services'
+import { setupClientService } from '../src/events/client.services'
 
 const app = express()
 
@@ -28,6 +35,9 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+
+setupEmailService()
+setupClientService()
 
 app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
     res.send('hello world')
@@ -44,6 +54,11 @@ app.use('/pay', payRouter)
 app.use('/resources', resourcesRouter)
 app.use('/actions', actionsRouter)
 app.use('/route-permission-map', routePermissionMapRouter)
+app.use('/user-permission', userPermissionRouter)
+app.use('/states', statesRouter)
+app.use('/organizations', organizationsRouter)
+app.use('/client-documents', clientDocumentsRouter)
+app.use('/client-company', clientCompanyRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500

@@ -19,7 +19,6 @@ export class DepartmentsController {
             name,
             created_at: new Date().toISOString(),
         })
-
         if (error) {
             res.status(500).json({ error: 'Error al crear el departamento' })
         }

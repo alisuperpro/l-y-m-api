@@ -1,8 +1,12 @@
 import express from 'express'
 import { EmployeeController } from '../controller/employee'
 import { verifyToken } from '../middleware/verifyToken'
-import { authoEmployee } from '../middleware/authEmployee'
 import { setRoutePermission } from '../middleware/loadPermission'
+import { auth } from '../middleware/auth'
+import { CanApproveOtherDebtsController } from '../controller/canApproveOtherDebts'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export const employeeRouter = express.Router()
 
@@ -10,16 +14,59 @@ employeeRouter.get(
     '/',
     verifyToken,
     setRoutePermission.loadRoutePermission,
-    authoEmployee,
+    auth,
     EmployeeController.getAll
 )
-employeeRouter.get('/username', verifyToken, EmployeeController.findByUsername)
-employeeRouter.get('/:id', verifyToken, EmployeeController.findEmployeeById)
+employeeRouter.get(
+    '/username',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    EmployeeController.findByUsername
+)
+employeeRouter.get(
+    '/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    EmployeeController.findEmployeeById
+)
 
-employeeRouter.post('/add', verifyToken, EmployeeController.add)
+employeeRouter.get(
+    '/creator/:creatorId/approvers',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    CanApproveOtherDebtsController.findByCreatorId
+)
+
+employeeRouter.get(
+    '/approver/:approverId',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    CanApproveOtherDebtsController.findByApproverId
+)
+
+employeeRouter.post(
+    '/add',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    EmployeeController.add
+)
+
+employeeRouter.post(
+    '/add-approver',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    CanApproveOtherDebtsController.add
+)
+
 employeeRouter.post('/login', EmployeeController.login)
-employeeRouter.post('/logout', verifyToken, EmployeeController.logout)
+employeeRouter.post('/logout', EmployeeController.logout)
 
-if (process.env.NODE_ENV === 'test') {
-    employeeRouter.delete('/', verifyToken, EmployeeController.delete)
+if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
+    employeeRouter.post('/add-admin', EmployeeController.add)
 }

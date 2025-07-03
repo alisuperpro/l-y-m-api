@@ -35,7 +35,7 @@ export class EmployeeModel {
             })
 
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
+                sql: `SELECT id, name, username, role_id, department_id, created_at FROM ${this.tableName} WHERE id = ?`,
                 args: [id],
             })
 
@@ -48,11 +48,11 @@ export class EmployeeModel {
     static async findEmployeeById({ id }: { id: string }) {
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
+                sql: `SELECT id, name, username, role_id, department_id, created_at FROM ${this.tableName} WHERE id = ?`,
                 args: [id],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (err: any) {
             return [err]
         }
@@ -61,7 +61,7 @@ export class EmployeeModel {
     static async getAll() {
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName}`,
+                sql: `SELECT id, name, username, role_id, department_id, created_at FROM ${this.tableName}`,
             })
 
             return [undefined, result.rows]
@@ -73,7 +73,24 @@ export class EmployeeModel {
     static async findByUsername({ username }: { username: string }) {
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE username = ?`,
+                sql: `SELECT id, name, username, role_id, department_id, created_at FROM ${this.tableName} WHERE username = ?`,
+                args: [username],
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async findByUsernameWithPassword({
+        username,
+    }: {
+        username: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT id, name, username, password, role_id, department_id, created_at FROM ${this.tableName} WHERE username = ?`,
                 args: [username],
             })
 

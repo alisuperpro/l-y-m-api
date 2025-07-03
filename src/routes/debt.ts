@@ -1,11 +1,38 @@
 import express from 'express'
 import { DebtController } from '../controller/debt'
+import { verifyToken } from '../middleware/verifyToken'
+import { setRoutePermission } from '../middleware/loadPermission'
+import { auth } from '../middleware/auth'
 
 export const debtRouter = express.Router()
 
-debtRouter.get('/getAllDebtInfo', DebtController.getAllDebtWithAllInfo)
-debtRouter.get('/:id', DebtController.getById)
+debtRouter.get(
+    '/getAllDebtInfo',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.getAllDebtWithAllInfo
+)
+debtRouter.get(
+    '/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.getById
+)
 
-debtRouter.post('/add', DebtController.add)
+debtRouter.post(
+    '/add',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.add
+)
 
-debtRouter.put('/updateStatus', DebtController.updateStatus)
+debtRouter.put(
+    '/updateStatus',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.updateStatus
+)

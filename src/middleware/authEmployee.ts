@@ -53,7 +53,7 @@ export const authoEmployee = async (
     )
 
     if (!perm) {
-        res.status(403).json({
+        res.status(401).json({
             error: 'No tienes permisos para acceder a esta ruta',
         })
         return

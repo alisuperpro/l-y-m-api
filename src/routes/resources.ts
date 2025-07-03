@@ -1,9 +1,29 @@
 import { Router } from 'express'
 import { ResourcesController } from '../controller/resources'
-
+import { verifyToken } from '../middleware/verifyToken'
+import { setRoutePermission } from '../middleware/loadPermission'
+import { auth } from '../middleware/auth'
 export const resourcesRouter = Router()
 
-resourcesRouter.get('/', ResourcesController.getAll)
-resourcesRouter.get('/:id', ResourcesController.getById)
+resourcesRouter.get(
+    '/',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ResourcesController.getAll
+)
+resourcesRouter.get(
+    '/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ResourcesController.getById
+)
 
-resourcesRouter.post('/add', ResourcesController.add)
+resourcesRouter.post(
+    '/add',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ResourcesController.add
+)

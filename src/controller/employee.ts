@@ -3,15 +3,17 @@ import dotenv from 'dotenv'
 import { EmployeeModel } from '../models/employee'
 import { hash, compare } from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { EmployeeSchema } from '../schemas/employee.schema'
 dotenv.config()
 
 export class EmployeeController {
     static async add(req: Request, res: Response) {
         const { name, username, password, roleId, departmentId } = req.body
+        const { error } = EmployeeSchema.safeParse(req.body)
 
-        if (!name || !username || !password || !roleId || !departmentId) {
-            res.status(403).json({
-                error: 'Faltan datos requeridos',
+        if (error) {
+            res.status(400).json({
+                error: 'Datos inválidos',
             })
             return
         }
@@ -69,9 +71,16 @@ export class EmployeeController {
     static async findEmployeeById(req: Request, res: Response) {
         const { id } = req.params
 
+        if (!id) {
+            res.status(400).json({
+                error: 'Falta el id',
+            })
+            return
+        }
+
         const [error, result] = await EmployeeModel.findEmployeeById({ id })
 
-        if (result.length === 0) {
+        if (!result) {
             res.status(404).json({
                 error: 'No encontrado',
             })
@@ -148,7 +157,16 @@ export class EmployeeController {
     static async login(req: Request, res: Response) {
         const { username, password } = req.body
 
-        const [error, result] = await EmployeeModel.findByUsername({ username })
+        if (!username || !password) {
+            res.status(403).json({
+                error: 'Usuario y/o contraseña invalido',
+            })
+            return
+        }
+
+        const [error, result] = await EmployeeModel.findByUsernameWithPassword({
+            username,
+        })
 
         if (error) {
             res.status(500).json({
