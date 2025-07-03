@@ -25,9 +25,13 @@ import { setupClientService } from '../src/events/client.services'
 const app = express()
 
 dotenv.config()
+
+const originsDev = ['http://localhost:4321']
+const originsProd = ['https://solucioneslym.com']
 const corsOptions = {
-    origin: ['*'],
+    origin: process.env.NODE_ENV === 'development' ? originsDev : originsProd,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    credentials: true,
 }
 
 app.use(cors(corsOptions))
