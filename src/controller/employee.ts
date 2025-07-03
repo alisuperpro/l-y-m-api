@@ -197,7 +197,7 @@ export class EmployeeController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
             }).json({
-                data: result,
+                data: { ...result, password: '' },
             })
         } else {
             res.status(403).json({
