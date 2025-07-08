@@ -48,6 +48,12 @@ employeeRouter.get(
     CanApproveOtherDebtsController.findByApproverId
 )
 
+employeeRouter.get(
+    '/user/token',
+    verifyToken,
+    EmployeeController.getUserByToken
+)
+
 employeeRouter.post(
     '/add',
     verifyToken,

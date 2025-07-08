@@ -60,6 +60,23 @@ export class ClientModel {
         }
     }
 
+    static async getAllClientsByCreatedBy({
+        createdBy,
+    }: {
+        createdBy: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT id, name, username, email, created_at, created_by FROM ${this.tableName} WHERE created_by = ?`,
+                args: [createdBy],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
     static async getAll() {
         try {
             const result = await db.execute(

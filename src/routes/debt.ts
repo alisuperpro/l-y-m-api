@@ -13,6 +13,15 @@ debtRouter.get(
     auth,
     DebtController.getAllDebtWithAllInfo
 )
+
+debtRouter.get(
+    '/:createdBy/all',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.getAllDebtWithAllInfoByCreatedBy
+)
+
 debtRouter.get(
     '/:id',
     verifyToken,

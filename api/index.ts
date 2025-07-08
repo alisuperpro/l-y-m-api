@@ -32,6 +32,7 @@ const corsOptions = {
     origin: process.env.NODE_ENV === 'development' ? originsDev : originsProd,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     credentials: true,
+    methods: 'GET,PUT,POST,DELETE',
 }
 
 app.use(cors(corsOptions))

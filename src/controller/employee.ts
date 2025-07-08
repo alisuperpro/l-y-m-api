@@ -212,6 +212,21 @@ export class EmployeeController {
         })
     }
 
+    static async getUserByToken(req: Request, res: Response) {
+        //@ts-ignore
+        const { user } = req.session
+
+        if (!user) {
+            res.status(404).json({
+                error: 'Error al obtener el usuario',
+            })
+            return
+        }
+        res.json({
+            data: user,
+        })
+    }
+
     static async delete(req: Request, res: Response) {
         const { id } = req.body
 

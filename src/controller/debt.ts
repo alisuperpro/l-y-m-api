@@ -86,6 +86,57 @@ export class DebtController {
         })
     }
 
+    static async getAll(req: Request, res: Response) {
+        const [error, result] = await DebtModel.getAll()
+
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'No se encontraron deudas',
+            })
+            return
+        }
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar la deuda',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
+    static async getAllDebtWithAllInfoByCreatedBy(req: Request, res: Response) {
+        //@ts-ignore
+        const { createdBy } = req.params
+        const [error, result] =
+            await DebtModel.getAllDebtWithAllInfoByCreatedBy({
+                createdBy,
+            })
+
+        console.log({ result })
+
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'No se encontraron deudas',
+            })
+            return
+        }
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar la deuda',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
     static async updateStatus(req: Request, res: Response) {
         //@ts-ignore
         const { user } = req.session

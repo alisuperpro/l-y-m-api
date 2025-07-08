@@ -145,6 +145,40 @@ export class ClientController {
         })
     }
 
+    static async getAllClientsByCreatedBy(req: Request, res: Response) {
+        const { createdBy } = req.params
+
+        const { error } = idSchema.safeParse(createdBy)
+
+        if (error) {
+            res.status(400).json({
+                error: error.issues[0].message,
+            })
+            return
+        }
+
+        const [clientError, result] =
+            await ClientModel.getAllClientsByCreatedBy({ createdBy })
+
+        if (result === undefined) {
+            res.status(404).json({
+                error: 'Clientes no encontrado',
+            })
+            return
+        }
+
+        if (clientError) {
+            res.status(500).json({
+                error: 'Error al guardar la informacion',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
     static async getAll(req: Request, res: Response) {
         const [error, result] = await ClientModel.getAll()
 

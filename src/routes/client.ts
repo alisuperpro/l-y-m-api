@@ -32,6 +32,14 @@ clientRouter.get(
     ClientController.findClientById
 )
 
+clientRouter.get(
+    '/:createdBy/all',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientController.getAllClientsByCreatedBy
+)
+
 clientRouter.post(
     '/add',
     verifyToken,

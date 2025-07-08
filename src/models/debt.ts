@@ -23,7 +23,7 @@ export class DebtModel {
 
         try {
             await db.execute({
-                sql: `INSERT INTO ${this.tableName} (id, amount, client_id, created_at, description, created_by, status) VALUES (?,?,?,?,?,?,?,?)`,
+                sql: `INSERT INTO ${this.tableName} (id, amount, client_id, created_at, description, created_by, status) VALUES (?,?,?,?,?,?,?)`,
                 args: [
                     id,
                     amount,
@@ -121,7 +121,6 @@ export class DebtModel {
                         d.amount,
                         d.description AS debt_description,
                         d.created_at AS debt_created_at,
-                        d.date AS due_date,
                         c.name AS client_name,
                         e.name AS created_by_employee_name,
                         s.state AS debt_status
@@ -139,6 +138,76 @@ export class DebtModel {
                     ;
                 `,
                 args: [clientId],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async getAll() {
+        try {
+            const result = await db.execute({
+                sql: `
+                    SELECT
+                        d.id AS debt_id,
+                        d.amount,
+                        d.description AS debt_description,
+                        d.created_at AS debt_created_at,
+                        c.name AS client_name,
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
+                    FROM
+                        "debt" d
+                    JOIN
+                        "clients" c ON d.client_id = c.id
+                    JOIN
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                    ORDER BY d.created_at
+                    DESC
+                    ;
+                `,
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async getAllDebtWithAllInfoByCreatedBy({
+        createdBy,
+    }: {
+        createdBy: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `
+                    SELECT
+                        d.id AS debt_id,
+                        d.amount,
+                        d.description AS debt_description,
+                        d.created_at AS debt_created_at,
+                        c.name AS client_name,
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
+                    FROM
+                        "debt" d
+                    JOIN
+                        "clients" c ON d.client_id = c.id
+                    JOIN
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                    WHERE d.created_by = ? 
+                    ORDER BY d.created_at
+                    DESC
+                    ;
+                `,
+                args: [createdBy],
             })
 
             return [undefined, result.rows]
