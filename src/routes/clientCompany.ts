@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const clientCompanyRouter = Router()
+clientCompanyRouter.use(setRoutePermission.setRouteResources('client_company'))
 
 clientCompanyRouter.get(
     '/client/:clientId',

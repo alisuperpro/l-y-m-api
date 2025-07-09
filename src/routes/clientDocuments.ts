@@ -5,6 +5,9 @@ import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
 
 export const clientDocumentsRouter = Router()
+clientDocumentsRouter.use(
+    setRoutePermission.setRouteResources('client_documents')
+)
 
 clientDocumentsRouter.get(
     '/client/:clientId',

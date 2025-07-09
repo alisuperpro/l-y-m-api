@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const organizationsRouter = Router()
+organizationsRouter.use(setRoutePermission.setRouteResources('organizations'))
 
 organizationsRouter.get(
     '/:id',

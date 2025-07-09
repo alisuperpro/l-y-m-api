@@ -4,6 +4,9 @@ import { verifyToken } from '../middleware/verifyToken'
 import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
 export const routePermissionMapRouter = Router()
+routePermissionMapRouter.use(
+    setRoutePermission.setRouteResources('route_permission_map')
+)
 
 routePermissionMapRouter.get(
     '/',

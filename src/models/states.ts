@@ -61,4 +61,21 @@ export class StatesModel {
             return [err]
         }
     }
+
+    static async getAllStateByResourcesName({
+        resources,
+    }: {
+        resources: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} AS s JOIN resources AS r ON s.resources = r.id WHERE r.name = ?`,
+                args: [resources],
+            })
+
+            return [undefined, result.rows]
+        } catch (err) {
+            return [err]
+        }
+    }
 }

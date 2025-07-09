@@ -5,6 +5,7 @@ import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
 
 export const roleRouter = express.Router()
+roleRouter.use(setRoutePermission.setRouteResources('role'))
 
 roleRouter.get(
     '/',

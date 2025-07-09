@@ -6,6 +6,8 @@ import { auth } from '../middleware/auth'
 
 export const payRouter = Router()
 
+payRouter.use(setRoutePermission.setRouteResources('pay'))
+
 payRouter.get(
     '/',
     verifyToken,

@@ -92,4 +92,23 @@ export class StatesController {
             data: result,
         })
     }
+
+    static async getAllStateByResources(req: Request, res: Response) {
+        const { resource } = req.params
+
+        const [error, result] = await StatesModel.getAllStateByResourcesName({
+            resources: resource,
+        })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar los estados',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
 }

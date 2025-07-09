@@ -4,7 +4,9 @@ import { DefaultClientPermissionsController } from '../controller/defaultClientP
 import { verifyToken } from '../middleware/verifyToken'
 import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
+
 export const permisionRouter = express.Router()
+permisionRouter.use(setRoutePermission.setRouteResources('permisison'))
 
 permisionRouter.get(
     '/',

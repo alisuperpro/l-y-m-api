@@ -5,6 +5,7 @@ import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
 
 export const statesRouter = Router()
+statesRouter.use(setRoutePermission.setRouteResources('states'))
 
 statesRouter.get(
     '/:id',
@@ -19,6 +20,13 @@ statesRouter.get(
     setRoutePermission.loadRoutePermission,
     auth,
     StatesController.getAllStates
+)
+statesRouter.get(
+    '/resources/:resource',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    StatesController.getAllStateByResources
 )
 
 statesRouter.post(

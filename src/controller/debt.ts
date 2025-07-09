@@ -4,9 +4,11 @@ import { CanApproveOtherDebtsModel } from '../models/canApproveOtherDebts'
 
 export class DebtController {
     static async add(req: Request, res: Response) {
-        const { amount, clientId, createdBy, description, status } = req.body
+        //@ts-ignore
+        const { user } = req.session
+        const { amount, clientId, description, status } = req.body
 
-        if (!amount || !clientId || !createdBy || !status) {
+        if (!amount || !clientId || !status) {
             res.status(400).json({
                 error: 'Faltan datos',
             })
@@ -19,7 +21,7 @@ export class DebtController {
             amount,
             clientId,
             createdAt,
-            createdBy,
+            createdBy: user.id,
             description: description === undefined ? null : description,
             status,
         })
@@ -87,7 +89,20 @@ export class DebtController {
     }
 
     static async getAll(req: Request, res: Response) {
-        const [error, result] = await DebtModel.getAll()
+        const order = req.query.order?.toString() ?? 'DESC'
+
+        const [error, result] = await DebtModel.getAll({
+            //@ts-ignore
+            order: order ?? 'DESC',
+        })
+
+        if (error) {
+            console.log({ error })
+            res.status(500).json({
+                error: 'Error al buscar la deuda',
+            })
+            return
+        }
 
         if (result.length === 0) {
             res.status(404).json({
@@ -96,9 +111,29 @@ export class DebtController {
             return
         }
 
+        res.json({
+            data: result,
+        })
+    }
+
+    static async getAllDebtsByStatusName(req: Request, res: Response) {
+        const { status } = req.params
+
+        const [error, result] = await DebtModel.getAllDebtsByStatusName({
+            status,
+            order: 'DESC',
+        })
+
         if (error) {
             res.status(500).json({
                 error: 'Error al buscar la deuda',
+            })
+            return
+        }
+
+        if (result.length === 0) {
+            res.status(404).json({
+                error: 'No se encontraron deudas',
             })
             return
         }

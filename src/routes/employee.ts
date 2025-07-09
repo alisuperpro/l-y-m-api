@@ -10,6 +10,8 @@ dotenv.config()
 
 export const employeeRouter = express.Router()
 
+employeeRouter.use(setRoutePermission.setRouteResources('employee'))
+
 employeeRouter.get(
     '/',
     verifyToken,

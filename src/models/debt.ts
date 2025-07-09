@@ -146,7 +146,7 @@ export class DebtModel {
         }
     }
 
-    static async getAll() {
+    static async getAll({ order }: { order: 'ASC' | 'DESC' }) {
         try {
             const result = await db.execute({
                 sql: `
@@ -167,9 +167,42 @@ export class DebtModel {
                     JOIN
                         "states" s ON d.status = s.id
                     ORDER BY d.created_at
-                    DESC
+                    ${order}
                     ;
                 `,
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async getAllDebtsByStatusName({
+        status,
+        order,
+    }: {
+        status: string
+        order: 'ASC' | 'DESC'
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `
+                    SELECT
+                        d.*
+                    FROM
+                        debt AS d
+                    JOIN
+                        states AS s
+                    ON
+                        d.status = s.id
+                    WHERE
+                        s.state = ?
+                        ORDER BY d.created_at
+                    ${order}
+                    ;
+                `,
+                args: [status],
             })
 
             return [undefined, result.rows]

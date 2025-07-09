@@ -6,12 +6,30 @@ import { auth } from '../middleware/auth'
 
 export const debtRouter = express.Router()
 
+debtRouter.use(setRoutePermission.setRouteResources('debt'))
+
 debtRouter.get(
     '/getAllDebtInfo',
     verifyToken,
     setRoutePermission.loadRoutePermission,
     auth,
     DebtController.getAllDebtWithAllInfo
+)
+
+debtRouter.get(
+    '/',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.getAll
+)
+
+debtRouter.get(
+    '/status/:status/all',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.getAllDebtsByStatusName
 )
 
 debtRouter.get(

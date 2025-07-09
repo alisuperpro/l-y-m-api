@@ -6,6 +6,8 @@ import { auth } from '../middleware/auth'
 
 export const departmentsRouter = express.Router()
 
+departmentsRouter.use(setRoutePermission.setRouteResources('departments'))
+
 departmentsRouter.get(
     '/',
     verifyToken,

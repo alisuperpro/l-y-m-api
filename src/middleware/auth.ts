@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express'
-import { PermissionModel } from '../models/permision'
 import { UserPermissionModel } from '../models/userPermission'
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
@@ -8,8 +7,9 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     //@ts-ignore
     const { user } = req.session
 
-    const [error, result] = await UserPermissionModel.getByUserId({
+    const [error, result] = await UserPermissionModel.getByUserAndPermissionId({
         userId: user.id,
+        permissionId: routePermission.id,
     })
 
     if (error) {
@@ -20,40 +20,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!result) {
-        res.status(404).json({
-            error: 'Usuario no encontrado',
-        })
-        return
-    }
-
-    const [permissionError, permissions] = await PermissionModel.findById({
-        id: routePermission.permission_id,
-    })
-
-    if (permissionError) {
-        res.status(500).json({
-            error: 'Error al obtener los permisos',
-        })
-        return
-    }
-
-    if (!permissions) {
-        res.status(500).json({
-            error: 'Error al obtener los permisos',
-        })
-        return
-    }
-
-    const perm = result.find(
-        (rp: { permission_id: any }) =>
-            rp.permission_id === routePermission.permission_id
-    )
-
-    if (!perm) {
         res.status(403).json({
             error: 'No tienes permisos para acceder a esta ruta',
         })
         return
     }
+
     next()
 }

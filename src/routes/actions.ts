@@ -4,6 +4,7 @@ import { verifyToken } from '../middleware/verifyToken'
 import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
 export const actionsRouter = Router()
+actionsRouter.use(setRoutePermission.setRouteResources('actions'))
 
 actionsRouter.get(
     '/',

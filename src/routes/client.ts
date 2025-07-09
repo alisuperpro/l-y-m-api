@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const clientRouter = express.Router()
+clientRouter.use(setRoutePermission.setRouteResources('clients'))
 
 clientRouter.get(
     '/',

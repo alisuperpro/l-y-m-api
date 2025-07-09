@@ -43,6 +43,18 @@ export class ResourcesModel {
         }
     }
 
+    static async getByName({ name }: { name: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE name = ?`,
+                args: [name],
+            })
+            return [undefined, result.rows[0]]
+        } catch (error) {
+            return [error]
+        }
+    }
+
     static async getAll() {
         try {
             const result = await db.execute({

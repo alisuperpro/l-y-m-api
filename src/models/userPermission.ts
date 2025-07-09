@@ -40,6 +40,25 @@ export class UserPermissionModel {
         }
     }
 
+    static async getByUserAndPermissionId({
+        userId,
+        permissionId,
+    }: {
+        userId: string
+        permissionId: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE user_id = ? AND permission_id = ?`,
+                args: [userId, permissionId],
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
     static async getAll() {
         try {
             const result = await db.execute({

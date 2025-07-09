@@ -65,7 +65,7 @@ export class ActionsModel {
                 args: [name],
             })
 
-            return [undefined, result.rows]
+            return [undefined, result.rows[0]]
         } catch (error) {
             return [error]
         }
