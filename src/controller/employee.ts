@@ -246,7 +246,7 @@ export class EmployeeController {
             return
         }
 
-        if (result2.length === 0) {
+        if (!result2) {
             res.status(404).json({
                 error: 'Empleado no encontrado',
             })
