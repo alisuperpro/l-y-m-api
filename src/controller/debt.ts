@@ -119,8 +119,8 @@ export class DebtController {
     static async getAllDebtsByStatusName(req: Request, res: Response) {
         const { status } = req.params
 
-        const [error, result] = await DebtModel.getAllDebtsByStatusName({
-            status,
+        const [error, result] = await DebtModel.getAllDebtsByStatusId({
+            statusId: status,
             order: 'DESC',
         })
 

@@ -1,6 +1,21 @@
 import { randomUUID } from 'node:crypto'
 import { db } from '../db/db'
 
+type Order = 'ASC' | 'DESC'
+
+interface DebtFilters {
+    statusId?: string // Changed from 'status' to 'statusName' for clarity with 'states' table
+    minAmount?: number
+    maxAmount?: number
+    startDate?: string // Assuming date string format, e.g., 'YYYY-MM-DD'
+    endDate?: string
+    clientId?: string
+    order?: Order
+    orderBy?: string // Column to order by, e.g., 'created_at', 'amount'
+    limit?: number
+    offset?: number
+}
+
 export class DebtModel {
     static tableName = 'debt'
 
@@ -178,31 +193,68 @@ export class DebtModel {
         }
     }
 
-    static async getAllDebtsByStatusName({
-        status,
-        order,
-    }: {
-        status: string
-        order: 'ASC' | 'DESC'
-    }) {
+    static async getAllDebtsByStatusId(filters: DebtFilters = {}) {
         try {
+            let sqlQuery = `
+            SELECT
+                d.*
+            FROM
+                debt AS d
+            JOIN
+                states AS s
+            ON
+                d.status = s.id
+            WHERE 1=1 -- This is a common trick to easily append conditions
+        `
+
+            const args: (string | number)[] = []
+
+            // Apply filters dynamically
+            if (filters.statusId) {
+                sqlQuery += ` AND s.id = ?`
+                args.push(filters.statusId)
+            }
+            if (filters.minAmount !== undefined) {
+                sqlQuery += ` AND d.amount >= ?`
+                args.push(filters.minAmount)
+            }
+            if (filters.maxAmount !== undefined) {
+                sqlQuery += ` AND d.amount <= ?`
+                args.push(filters.maxAmount)
+            }
+            if (filters.startDate) {
+                sqlQuery += ` AND d.created_at >= ?`
+                args.push(filters.startDate)
+            }
+            if (filters.endDate) {
+                sqlQuery += ` AND d.created_at <= ?`
+                args.push(filters.endDate)
+            }
+            if (filters.clientId) {
+                sqlQuery += ` AND d.client_id = ?`
+                args.push(filters.clientId)
+            }
+
+            // Apply ordering
+            const orderByColumn = filters.orderBy || 'd.created_at' // Default order by
+            const orderDirection = filters.order || 'DESC' // Default to DESC
+            sqlQuery += ` ORDER BY ${orderByColumn} ${orderDirection}`
+
+            // Apply pagination
+            if (filters.limit !== undefined) {
+                sqlQuery += ` LIMIT ?`
+                args.push(filters.limit)
+            }
+            if (filters.offset !== undefined) {
+                sqlQuery += ` OFFSET ?`
+                args.push(filters.offset)
+            }
+
+            sqlQuery += `;` // Close the query
+
             const result = await db.execute({
-                sql: `
-                    SELECT
-                        d.*
-                    FROM
-                        debt AS d
-                    JOIN
-                        states AS s
-                    ON
-                        d.status = s.id
-                    WHERE
-                        s.state = ?
-                        ORDER BY d.created_at
-                    ${order}
-                    ;
-                `,
-                args: [status],
+                sql: sqlQuery,
+                args: args,
             })
 
             return [undefined, result.rows]
