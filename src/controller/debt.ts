@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { DebtModel } from '../models/debt'
 import { CanApproveOtherDebtsModel } from '../models/canApproveOtherDebts'
+import { appEventEmitter } from '../events/eventEmitter'
 
 export class DebtController {
     static async add(req: Request, res: Response) {
@@ -32,6 +33,16 @@ export class DebtController {
             })
             return
         }
+
+        appEventEmitter.emit('debtCreated', {
+            clientId: clientId,
+            status,
+            amount,
+            debtId: result.id,
+            description,
+            createdAt,
+            expireIn: 'La deuda expira a los 30 dias de la creacion',
+        })
 
         res.json({
             data: result,
