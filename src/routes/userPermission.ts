@@ -8,6 +8,9 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const userPermissionRouter = Router()
+userPermissionRouter.use(
+    setRoutePermission.setRouteResources('user_permission')
+)
 
 userPermissionRouter.get(
     '/',
