@@ -193,6 +193,88 @@ export class DebtModel {
         }
     }
 
+    static async getDebtsByClientId({
+        clientId,
+        order,
+    }: {
+        clientId: string
+        order: 'ASC' | 'DESC'
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `
+                    SELECT
+                        d.id AS debt_id,
+                        d.amount,
+                        d.description AS debt_description,
+                        d.created_at AS debt_created_at,
+                        c.name AS client_name,
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
+                    FROM
+                        "debt" d
+                    JOIN
+                        "clients" c ON d.client_id = c.id
+                    JOIN
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                        WHERE d.client_id = ?
+                    ORDER BY d.created_at
+                    ${order}
+                    ;
+                `,
+                args: [clientId],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async getDebtsByClientToVerifyExpireDebt({
+        clientId,
+        date,
+        status,
+        order,
+    }: {
+        clientId: string
+        date: string
+        status: string
+        order: 'ASC' | 'DESC'
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `
+                    SELECT
+                        d.id AS debt_id,
+                        d.created_at AS debt_created_at,
+                        c.name AS client_name,
+                        e.name AS created_by_employee_name,
+                        s.state AS debt_status
+                    FROM
+                        "debt" d
+                    JOIN
+                        "clients" c ON d.client_id = c.id
+                    JOIN
+                        "employee" e ON d.created_by = e.id
+                    JOIN
+                        "states" s ON d.status = s.id
+                        WHERE d.client_id = ? AND  d.status = ? AND d.created_at < ?
+                    ORDER BY d.created_at
+                    ${order}
+                    ;
+                `,
+                args: [clientId, status, date],
+            })
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
     static async getAllDebtsByStatusId(filters: DebtFilters = {}) {
         try {
             let sqlQuery = `
