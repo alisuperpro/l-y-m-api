@@ -3,6 +3,7 @@ import { ClientDocumentsController } from '../controller/clientDocuments'
 import { verifyToken } from '../middleware/verifyToken'
 import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
+import { verifyExpireClientDebt } from '../middleware/verifyExpireClientDebt'
 
 export const clientDocumentsRouter = Router()
 clientDocumentsRouter.use(
@@ -12,6 +13,7 @@ clientDocumentsRouter.use(
 clientDocumentsRouter.get(
     '/client/:clientId',
     verifyToken,
+    verifyExpireClientDebt,
     setRoutePermission.loadRoutePermission,
     auth,
     ClientDocumentsController.findByClientId
@@ -19,6 +21,7 @@ clientDocumentsRouter.get(
 clientDocumentsRouter.get(
     '/:id',
     verifyToken,
+    verifyExpireClientDebt,
     setRoutePermission.loadRoutePermission,
     auth,
     ClientDocumentsController.findById
