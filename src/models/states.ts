@@ -37,6 +37,25 @@ export class StatesModel {
         }
     }
 
+    static async findBySlugAndResources({
+        resources,
+        slug,
+    }: {
+        resources: string
+        slug: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE slug = ? AND resources = ?`,
+                args: [slug, resources],
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (err) {
+            return [err]
+        }
+    }
+
     static async findByState({ state }: { state: string }) {
         try {
             const result = await db.execute({

@@ -4,6 +4,7 @@ import { EmployeeModel } from '../models/employee'
 import { hash, compare } from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { EmployeeSchema } from '../schemas/employee.schema'
+import { verifyExpireClientDebts } from '../middleware/verifyExpireClientDebt'
 dotenv.config()
 
 export class EmployeeController {
@@ -264,6 +265,22 @@ export class EmployeeController {
 
         res.json({
             data: result,
+        })
+    }
+
+    static async isClientDebtExpired(req: Request, res: Response) {
+        const { clientId, state } = req.params
+        const debtExpired = await verifyExpireClientDebts({ clientId, state })
+
+        if (typeof debtExpired === 'string') {
+            res.status(500).json({
+                error: debtExpired,
+            })
+            return
+        }
+
+        res.json({
+            data: debtExpired ?? 'No hay deudas',
         })
     }
 }

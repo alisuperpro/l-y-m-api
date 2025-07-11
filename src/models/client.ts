@@ -11,6 +11,8 @@ export class ClientModel {
         created_at,
         email,
         createdBy,
+        avatar,
+        accountState,
     }: {
         name: string
         username: string
@@ -18,12 +20,15 @@ export class ClientModel {
         created_at: string
         email: string
         createdBy: string
+        avatar: string
+        accountState: string
     }) {
         const id = randomUUID()
 
         try {
             await db.execute({
-                sql: `INSERT INTO ${this.tableName} (id, name, username, password, email, created_at, created_by) VALUES (?,?,?,?,?,?,?)`,
+                sql: `INSERT INTO ${this.tableName} (id, name, username, password, email, created_at, created_by, avatar, account_state)
+                VALUES (?,?,?,?,?,?,?,?,?)`,
                 args: [
                     id,
                     name,
@@ -32,11 +37,13 @@ export class ClientModel {
                     email,
                     created_at,
                     createdBy,
+                    avatar,
+                    accountState,
                 ],
             })
 
             const result = await db.execute({
-                sql: `SELECT id, name, username, email, created_at, created_by FROM ${this.tableName} WHERE id = ?`,
+                sql: `SELECT id, name, username, email, created_at, created_by, avatar, account_state FROM ${this.tableName} WHERE id = ?`,
                 args: [id],
             })
 

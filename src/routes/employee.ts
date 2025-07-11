@@ -5,6 +5,7 @@ import { setRoutePermission } from '../middleware/loadPermission'
 import { auth } from '../middleware/auth'
 import { CanApproveOtherDebtsController } from '../controller/canApproveOtherDebts'
 import dotenv from 'dotenv'
+import { verifyExpireClientDebts } from '../middleware/verifyExpireClientDebt'
 
 dotenv.config()
 
@@ -54,6 +55,14 @@ employeeRouter.get(
     '/user/token',
     verifyToken,
     EmployeeController.getUserByToken
+)
+
+employeeRouter.get(
+    '/client/is-debt-expired/:state/:clientId',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    EmployeeController.isClientDebtExpired
 )
 
 employeeRouter.post(

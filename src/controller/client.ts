@@ -10,13 +10,12 @@ import {
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { generatePassword } from '../utils/generatePassword'
-import { sendEmail } from '../services/email.services'
 import { appEventEmitter } from '../events/eventEmitter'
 dotenv.config()
 
 export class ClientController {
     static async add(req: Request, res: Response) {
-        const { name, username, email } = req.body
+        const { name, username, email, avatar, accountState } = req.body
 
         const { error } = clientSchema.safeParse(req.body)
 
@@ -90,6 +89,8 @@ export class ClientController {
                 email,
                 created_at,
                 createdBy: user.id,
+                avatar,
+                accountState,
             })
             if (error) {
                 res.status(500).json({

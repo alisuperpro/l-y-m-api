@@ -1,5 +1,7 @@
+import { appEventEmitter } from '../events/eventEmitter'
 import { PayModel } from '../models/pay'
 import { Request, Response } from 'express'
+import { StatesModel } from '../models/states'
 
 export class PayController {
     static async add(req: Request, res: Response) {
@@ -11,10 +13,16 @@ export class PayController {
             description,
             amount,
             debtId,
-            status,
         } = req.body
 
         const createdAt = new Date().toISOString()
+
+        const [stateError, stateResult] =
+            await StatesModel.findBySlugAndResources({
+                slug: 'on process',
+                //@ts-ignore
+                resources: req.resources,
+            })
 
         const [error, pay] = await PayModel.add({
             referenceCode,
@@ -25,7 +33,8 @@ export class PayController {
             description,
             amount,
             debtId,
-            status,
+            //@ts-ignore
+            status: stateResult.id,
         })
 
         if (error) {
@@ -41,6 +50,10 @@ export class PayController {
             })
             return
         }
+
+        appEventEmitter.emit('debtPay', {
+            debtId: debtId,
+        })
 
         res.status(200).json({
             data: pay,
@@ -155,6 +168,57 @@ export class PayController {
 
         res.json({
             data: pay,
+        })
+    }
+
+    static async approvedPay(req: Request, res: Response) {
+        const { payId } = req.params
+        //@ts-ignore
+        const resource = req.resources
+
+        const [stateError, stateResult] =
+            await StatesModel.findBySlugAndResources({
+                slug: 'confirmed',
+                resources: resource,
+            })
+
+        if (stateError) {
+            res.status(500).json({
+                error: 'Error al buscar el estado para el pago',
+            })
+            return
+        }
+
+        const [payError, payResult] = await PayModel.updateStatus({
+            id: payId,
+            //@ts-ignore
+            status: stateResult.id,
+        })
+
+        if (payError) {
+            res.status(500).json({
+                error: 'Error al actualizar el estado del pago',
+            })
+        }
+
+        if (!payResult) {
+            res.status(404).json({
+                error: 'Pago no encontrado',
+            })
+            return
+        }
+
+        appEventEmitter.emit('payApproved', {
+            ...payResult,
+        })
+
+        appEventEmitter.emit('debtPaid', {
+            //@ts-ignore
+            debtId: payResult.debt_id,
+        })
+
+        res.json({
+            data: payResult,
         })
     }
 

@@ -21,6 +21,7 @@ import { clientDocumentsRouter } from '../src/routes/clientDocuments'
 import { clientCompanyRouter } from '../src/routes/clientCompany'
 import { setupEmailService } from '../src/events/email.services'
 import { setupClientService } from '../src/events/client.services'
+import { setupDebtService } from '../src/events/debt.services'
 
 const app = express()
 
@@ -43,6 +44,7 @@ app.use(cookieParser())
 
 setupEmailService()
 setupClientService()
+setupDebtService()
 
 app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
     res.send('hello world')

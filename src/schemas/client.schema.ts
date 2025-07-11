@@ -17,4 +17,8 @@ export const clientSchema = z.object({
     name: z.string().min(2, { message: 'El nombre es requerido' }),
     username: z.string().min(2, { message: 'El usuario es requerido' }),
     email: emailSchema,
+    avatar: z.string().url(),
+    accountState: z
+        .string()
+        .uuid({ message: 'El estado de la cuenta debe ser un UUID válido' }),
 })

@@ -69,7 +69,6 @@ export class DebtModel {
                         d.amount,
                         d.description AS debt_description,
                         d.created_at AS debt_created_at,
-                        d.date AS due_date,
                         c.name AS client_name,
                         e.name AS created_by_employee_name,
                         s.state AS debt_status
@@ -102,7 +101,6 @@ export class DebtModel {
                         d.amount,
                         d.description AS debt_description,
                         d.created_at AS debt_created_at,
-                        d.date AS due_date,
                         c.name AS client_name,
                         e.name AS created_by_employee_name,
                         s.state AS debt_status
