@@ -13,7 +13,6 @@ import { departmentsRouter } from '../src/routes/departments'
 import { payRouter } from '../src/routes/pay'
 import { resourcesRouter } from '../src/routes/resources'
 import { actionsRouter } from '../src/routes/actions'
-import { routePermissionMapRouter } from '../src/routes/routePermissionMap'
 import { userPermissionRouter } from '../src/routes/userPermission'
 import { statesRouter } from '../src/routes/states'
 import { organizationsRouter } from '../src/routes/organizations'
@@ -60,7 +59,6 @@ app.use('/departments', departmentsRouter)
 app.use('/pay', payRouter)
 app.use('/resources', resourcesRouter)
 app.use('/actions', actionsRouter)
-app.use('/route-permission-map', routePermissionMapRouter)
 app.use('/user-permission', userPermissionRouter)
 app.use('/states', statesRouter)
 app.use('/organizations', organizationsRouter)

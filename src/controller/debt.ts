@@ -2,14 +2,22 @@ import { Request, Response } from 'express'
 import { DebtModel } from '../models/debt'
 import { CanApproveOtherDebtsModel } from '../models/canApproveOtherDebts'
 import { appEventEmitter } from '../events/eventEmitter'
+import { StatesModel } from '../models/states'
 
 export class DebtController {
     static async add(req: Request, res: Response) {
         //@ts-ignore
         const { user } = req.session
-        const { amount, clientId, description, status } = req.body
+        const { amount, clientId, description } = req.body
 
-        if (!amount || !clientId || !status) {
+        const [stateError, stateResult] =
+            await StatesModel.findBySlugAndResources({
+                slug: 'pending',
+                //@ts-ignore
+                resources: req.resources,
+            })
+
+        if (!amount || !clientId) {
             res.status(400).json({
                 error: 'Faltan datos',
             })
@@ -24,7 +32,8 @@ export class DebtController {
             createdAt,
             createdBy: user.id,
             description: description === undefined ? null : description,
-            status,
+            //@ts-ignore
+            status: stateResult.id,
         })
 
         if (error) {
