@@ -207,16 +207,13 @@ export class EmployeeController {
                 expiresIn: '1d',
             })
 
-            console.log({
-                domain: process.env.ACCEPTED_ORIGIN,
-            })
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'none',
                 domain:
                     process.env.NODE_ENV === 'production'
-                        ? process.env.ACCEPTED_ORIGIN
+                        ? process.env.COOKIE_ACCEPTED_DOMAIN
                         : undefined,
             }).json({
                 data,

@@ -395,6 +395,11 @@ export class ClientController {
             res.cookie('client_access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none',
+                domain:
+                    process.env.NODE_ENV === 'production'
+                        ? process.env.COOKIE_ACCEPTED_DOMAIN
+                        : undefined,
             }).json({
                 data: result,
             })
