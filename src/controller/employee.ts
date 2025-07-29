@@ -214,7 +214,7 @@ export class EmployeeController {
                 domain:
                     process.env.NODE_ENV === 'production'
                         ? process.env.ACCEPTED_ORIGIN
-                        : 'http://localhost:4321',
+                        : undefined,
             }).json({
                 data,
             })
