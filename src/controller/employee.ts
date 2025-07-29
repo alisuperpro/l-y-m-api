@@ -217,6 +217,7 @@ export class EmployeeController {
                 priority: 'high',
             }).json({
                 data,
+                value: token,
             })
         } else {
             res.status(403).json({
