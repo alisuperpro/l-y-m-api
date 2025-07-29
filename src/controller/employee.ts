@@ -217,6 +217,7 @@ export class EmployeeController {
                 partitioned:
                     process.env.NODE_ENV === 'production' ? true : false,
                 domain: process.env.COOKIE_ACCEPTED_DOMAIN,
+                priority: 'high',
             }).json({
                 data,
             })
