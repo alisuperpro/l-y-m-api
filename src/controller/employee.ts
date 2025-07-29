@@ -211,6 +211,10 @@ export class EmployeeController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'none',
+                domain:
+                    process.env.NODE_ENV === 'production'
+                        ? process.env.ACCEPTED_ORIGIN
+                        : 'http://localhost:4321',
             }).json({
                 data,
             })
