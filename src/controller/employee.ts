@@ -213,6 +213,7 @@ export class EmployeeController {
                 sameSite: 'none',
                 path: '/',
                 expires: new Date(Date.now() + 86400000 * 7),
+                partitioned: true,
             }).json({
                 data,
             })
