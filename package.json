@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "packageManager": "pnpm@10.11.0",
     "scripts": {
         "start": "node ./dist/api/index.js",
         "dev": "cross-env NODE_ENV=development nodemon ./api/index.ts",
