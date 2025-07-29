@@ -214,8 +214,7 @@ export class EmployeeController {
                     process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                 path: '/',
                 expires: new Date(Date.now() + 86400000 * 7),
-                partitioned:
-                    process.env.NODE_ENV === 'production' ? true : false,
+
                 domain: process.env.COOKIE_ACCEPTED_DOMAIN,
                 priority: 'high',
             }).json({
