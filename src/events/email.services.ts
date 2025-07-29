@@ -290,6 +290,7 @@ export function setupEmailService() {
     .button-container {
         text-align: center;
         padding: 20px 0;
+        color: #000
     }
     .button {
         display: inline-block;
@@ -323,7 +324,7 @@ export function setupEmailService() {
             <p>Te recomendamos encarecidamente que cambies esta contraseña por una de tu elección la primera vez que inicies sesión para mayor seguridad.</p>
             <p>Puedes iniciar sesión aquí:</p>
             <div class="button-container">
-                <a href="${BUSSINES_DATA.web}/login" class="button">Iniciar Sesión Ahora</a>
+                <a href="${BUSSINES_DATA.web}/cliente/login" class="button">Iniciar Sesión Ahora</a>
             </div>
             <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
             <p>Saludos,<br>El equipo de ${BUSSINES_DATA.name}</p>
@@ -365,7 +366,7 @@ export function setupEmailService() {
         }
 
         const template = templates.debtCreated
-            .replace('[Nombre del Usuario]', result.name)
+            .replace('[Nombre del Usuario]', result.client.name)
             .replace('[Número de Deuda]', data.debtId)
             .replace(
                 '[Concepto de la Deuda]',
@@ -373,13 +374,16 @@ export function setupEmailService() {
             )
             .replace('[Monto de la Deuda]', data.amount)
             .replace('[Moneda]', '$')
-            .replace('[Fecha de Creacion]', data.createdAt)
+            .replace(
+                '[Fecha de Creacion]',
+                new Date(data.createdAt).toLocaleDateString('es-ES')
+            )
             .replace('[Fecha de Vencimiento]', data.expireIn)
             //@ts-ignore
             .replace('[Estado]', statusResult.state)
             .replace(
                 '[acceder a mi cuenta]',
-                `${BUSSINES_DATA.web}/perfil/${data.clientId}`
+                `${BUSSINES_DATA.web}/cliente/perfil/${data.clientId}`
             )
             .replace('[Tu Nombre o Nombre de la Empresa]', BUSSINES_DATA.name)
             .replace('[Enlace a tu sitio web]', BUSSINES_DATA.web)
@@ -387,11 +391,15 @@ export function setupEmailService() {
             .replace('[Tu Correo de Soporte]', BUSSINES_DATA.supportEmail)
             .replace('[Tu Correo de Soporte]', BUSSINES_DATA.supportEmail)
 
-        await sendEmail({
-            to: result.email,
-            subject: 'Soluciones L y M - Soporte, Nueva Deuda Creada',
-            body: template,
-        })
+        try {
+            await sendEmail({
+                to: result.client.email,
+                subject: 'Soluciones L y M - Soporte, Nueva Deuda Creada',
+                body: template,
+            })
+        } catch (error) {
+            console.log('Error al enviar el correo de deuda creada:', error)
+        }
     })
 
     appEventEmitter.on('payApproved', async (data: any) => {
@@ -408,7 +416,7 @@ export function setupEmailService() {
         }
 
         const template = templates.aprovedPay
-            .replace('[Nombre del Cliente]', result.name)
+            .replace('[Nombre del Cliente]', result.client.name)
             .replace('[Número de Referencia de Deuda]', data.debt_id)
             .replace(
                 '[Enlace a su Portal de Cliente o Contacto]',
@@ -426,7 +434,7 @@ export function setupEmailService() {
             )
 
         await sendEmail({
-            to: result.email,
+            to: result.client.email,
             subject: 'Soluciones L y M - Soporte, Pago aprovado',
             body: template,
         })

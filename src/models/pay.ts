@@ -1,5 +1,6 @@
 import { db } from '../db/db'
 import { randomUUID } from 'node:crypto'
+import { QueryBuilder } from './queryBuilder'
 
 export class PayModel {
     static tableName = 'pay'
@@ -37,7 +38,7 @@ export class PayModel {
                     payDate,
                     createdAt,
                     clientId,
-                    photoUrl,
+                    photoUrl ? photoUrl : null,
                     description,
                     amount,
                     debtId,
@@ -97,10 +98,46 @@ export class PayModel {
         }
     }
 
-    static async getAll() {
+    static async getAll({
+        orderBy = 'DESC',
+        limit,
+        state,
+    }: {
+        orderBy: 'DESC' | 'ASC'
+        limit: number | null
+        state?: string
+    }) {
+        const builder = new QueryBuilder(this.tableName)
+
+        builder
+            .select([
+                'pay.id',
+                'pay.reference_code',
+                'pay.pay_date',
+                'pay.created_at',
+                'pay.photo_url',
+                'pay.description',
+                'pay.debt_id',
+                'pay.amount',
+                'states.state',
+                'states.slug',
+                'clients.name',
+                'clients.avatar',
+            ])
+            .join('clients', 'pay.client_id = clients.id', 'INNER')
+            .join('states', 'pay.status = states.id', 'INNER')
+            .orderBy('pay.created_at', orderBy)
+        if (limit) {
+            builder.limit(limit)
+        }
+
+        if (state) {
+            builder.where('states.id', state)
+        }
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName}`,
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows]
@@ -109,11 +146,49 @@ export class PayModel {
         }
     }
 
-    static async getByClientId({ clientId }: { clientId: string }) {
+    static async getByClientId({
+        clientId,
+        orderBy = 'DESC',
+        state,
+        limit,
+    }: {
+        clientId: string
+        orderBy: 'ASC' | 'DESC'
+        state?: string
+        limit?: number
+    }) {
+        const builder = new QueryBuilder(this.tableName)
+
+        builder
+            .select([
+                'pay.id',
+                'pay.reference_code',
+                'pay.pay_date',
+                'pay.created_at',
+                'pay.photo_url',
+                'pay.description',
+                'pay.debt_id',
+                'pay.amount',
+                'states.state',
+                'states.slug',
+                'clients.name',
+                'clients.avatar',
+            ])
+            .join('clients', 'pay.client_id = clients.id', 'INNER')
+            .join('states', 'pay.status = states.id', 'INNER')
+            .orderBy('pay.created_at', orderBy)
+            .where('pay.client_id', clientId)
+        if (limit) {
+            builder.limit(limit)
+        }
+
+        if (state) {
+            builder.where('states.id', state)
+        }
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE client_id = ?`,
-                args: [clientId],
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows]

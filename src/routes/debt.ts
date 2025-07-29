@@ -9,7 +9,7 @@ export const debtRouter = express.Router()
 debtRouter.use(setRoutePermission.setRouteResources('debt'))
 
 debtRouter.get(
-    '/getAllDebtInfo',
+    '/client',
     verifyToken,
     setRoutePermission.loadRoutePermission,
     auth,

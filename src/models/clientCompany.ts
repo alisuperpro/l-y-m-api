@@ -50,6 +50,18 @@ export class ClientCompanyModel {
         }
     }
 
+    static async getAll() {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName}`,
+            })
+
+            return [undefined, result.rows]
+        } catch (err) {
+            return [err]
+        }
+    }
+
     static async findById({ id }: { id: string }) {
         try {
             const result = await db.execute({
@@ -77,7 +89,7 @@ export class ClientCompanyModel {
 
             return {
                 sql: inserts,
-                args: [id, company.name, company.created_at, company.client_id],
+                args: [id, company.name, company.created_at, clientId],
             }
         })
         try {

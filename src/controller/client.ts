@@ -11,13 +11,21 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { generatePassword } from '../utils/generatePassword'
 import { appEventEmitter } from '../events/eventEmitter'
+import { StatesModel } from '../models/states'
 dotenv.config()
 
 export class ClientController {
     static async add(req: Request, res: Response) {
-        const { name, username, email, avatar, accountState } = req.body
+        const { name, username, email, avatar } = req.body
 
         const { error } = clientSchema.safeParse(req.body)
+
+        const [stateError, stateResult] =
+            await StatesModel.findBySlugAndResources({
+                //@ts-ignore
+                resources: req.resources,
+                slug: 'no debt',
+            })
 
         if (error) {
             res.status(400).json({
@@ -90,7 +98,8 @@ export class ClientController {
                 created_at,
                 createdBy: user.id,
                 avatar,
-                accountState,
+                //@ts-ignore
+                accountState: stateResult.id,
             })
             if (error) {
                 res.status(500).json({
@@ -126,6 +135,7 @@ export class ClientController {
         }
 
         const [clientError, result] = await ClientModel.findClientById({ id })
+        console.log(result)
 
         if (result === undefined) {
             res.status(404).json({
@@ -181,7 +191,13 @@ export class ClientController {
     }
 
     static async getAll(req: Request, res: Response) {
-        const [error, result] = await ClientModel.getAll()
+        const { filterBy, filterValue, sort = 'ASC' } = req.query
+
+        const [error, result] = await ClientModel.getAllClientsWithInfo({
+            filterBy: filterBy?.toString() ?? null,
+            filterValue: filterValue?.toString() ?? null,
+            sort: sort !== 'ASC' ? 'DESC' : 'ASC',
+        })
 
         if (error) {
             res.status(500).json({
@@ -199,6 +215,25 @@ export class ClientController {
 
         res.json({
             data: result,
+        })
+    }
+
+    static async getUserByToken(req: Request, res: Response) {
+        //@ts-ignore
+        const { user } = req.session
+
+        if (!user) {
+            res.status(404).json({
+                error: 'Error al obtener el usuario',
+            })
+            return
+        }
+
+        const data = {
+            ...user,
+        }
+        res.json({
+            data,
         })
     }
 
@@ -357,7 +392,7 @@ export class ClientController {
                 }
             )
 
-            res.cookie('access_token', token, {
+            res.cookie('client_access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
             }).json({
@@ -371,7 +406,7 @@ export class ClientController {
     }
 
     static async logout(req: Request, res: Response) {
-        res.clearCookie('access_token').json({
+        res.clearCookie('client_access_token').json({
             message: 'logout',
         })
     }

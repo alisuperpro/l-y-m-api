@@ -16,6 +16,14 @@ clientCompanyRouter.get(
     auth,
     ClientCompanyController.findByClientId
 )
+
+clientCompanyRouter.get(
+    '/',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientCompanyController.getAll
+)
 clientCompanyRouter.get(
     '/:id',
     verifyToken,
@@ -34,7 +42,9 @@ clientCompanyRouter.post(
 
 clientCompanyRouter.post(
     '/add-on-list',
-
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
     ClientCompanyController.addOnList
 )
 

@@ -16,7 +16,7 @@ export const verifyExpireClientDebtMiddleware = async (
         state: 'pendiente',
     })
 
-    if (typeof debtExpired === 'string') {
+    if (debtExpired) {
         res.status(500).json({
             error: debtExpired,
         })

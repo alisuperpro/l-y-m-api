@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { db } from '../db/db'
+import { QueryBuilder } from './queryBuilder'
 
 export class ClientModel {
     static tableName = 'clients'
@@ -55,13 +56,40 @@ export class ClientModel {
     }
 
     static async findClientById({ id }: { id: string }) {
-        try {
-            const result = await db.execute({
-                sql: `SELECT id, name, username, email, created_at, created_by FROM ${this.tableName} WHERE id = ?`,
-                args: [id],
-            })
+        const builder = new QueryBuilder(this.tableName)
 
-            return [undefined, result.rows[0]]
+        builder
+            .select([
+                'clients.id',
+                'name',
+                'username',
+                'email',
+                'created_at',
+                'created_by',
+                'avatar',
+                'states.state AS account_state',
+            ])
+            .join('states', 'states.id = clients.account_state')
+            .where('clients.id', id)
+
+        const batch = [
+            {
+                sql: builder.build().sql,
+                args: builder.build().args,
+            },
+            {
+                sql: 'SELECT * FROM client_company WHERE client_id = ?',
+                args: [id],
+            },
+        ]
+        try {
+            const result = await db.batch(batch, 'read')
+
+            const clientData = {
+                client: result[0].rows[0],
+                companys: result[1].rows,
+            }
+            return [undefined, clientData]
         } catch (err: any) {
             return [err]
         }
@@ -87,8 +115,48 @@ export class ClientModel {
     static async getAll() {
         try {
             const result = await db.execute(
-                `SELECT id, name, username, email, created_at, created_by FROM ${this.tableName}`
+                `SELECT id, name, username, email, created_at, created_by, avatar, account_state FROM ${this.tableName}`
             )
+
+            return [undefined, result.rows]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async getAllClientsWithInfo({
+        filterBy,
+        filterValue,
+        sort = 'DESC',
+    }: {
+        filterBy?: string | null
+        filterValue?: string | null
+        sort?: 'ASC' | 'DESC' | undefined
+    }) {
+        const builder = new QueryBuilder('clients')
+
+        builder
+            .select([
+                'clients.id',
+                'name',
+                'username',
+                'email',
+                'created_at',
+                'created_by',
+                'avatar',
+                'states.state',
+            ])
+            .join('states', 'clients.account_state = states.id', 'LEFT')
+            .orderBy('clients.created_at', sort)
+        if (filterBy && filterValue) {
+            builder.where(filterBy, filterValue)
+        }
+
+        try {
+            const result = await db.execute({
+                sql: builder.build().sql,
+                args: builder.build().args,
+            })
 
             return [undefined, result.rows]
         } catch (err: any) {

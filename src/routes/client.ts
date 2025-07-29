@@ -25,6 +25,8 @@ clientRouter.get(
     ClientController.findByUsername
 )
 
+clientRouter.get('/user/token', verifyToken, ClientController.getUserByToken)
+
 clientRouter.get(
     '/:id',
     verifyToken,

@@ -8,7 +8,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     const { user } = req.session
 
     const [error, result] = await UserPermissionModel.getByUserAndPermissionId({
-        userId: user.id,
+        userId: user.id || user.employee_id,
         permissionId: routePermission.id,
     })
 

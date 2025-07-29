@@ -42,6 +42,21 @@ export class ClientCompanyController {
         })
     }
 
+    static async getAll(req: Request, res: Response) {
+
+        const [err, result] = await ClientCompanyModel.getAll()
+
+        if (err) {
+            res.status(500).json({ error: 'Error fetching client companies' })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+
+    }
+
     static async findByClientId(req: any, res: any) {
         const { clientId } = req.params
 
@@ -63,7 +78,7 @@ export class ClientCompanyController {
         }
 
         res.json({
-            result,
+            data: result,
         })
     }
 

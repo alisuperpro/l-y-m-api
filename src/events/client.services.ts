@@ -54,7 +54,5 @@ export async function setupClientService() {
         }
     })
 
-    console.log(
-        '[Client Services] Escuchando eventos "clientCreated" para enviar correos electrónicos'
-    )
+    console.log('[Client Services] Escuchando eventos')
 }

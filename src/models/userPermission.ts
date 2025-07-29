@@ -83,7 +83,7 @@ export class UserPermissionModel {
         const list = permissionList.map((permission: any) => {
             return {
                 sql: inserts,
-                args: [permission.user_id, permission.permission_id],
+                args: [userId, permission.permission_id],
             }
         })
         try {

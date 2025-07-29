@@ -27,6 +27,23 @@ clientDocumentsRouter.get(
     ClientDocumentsController.findById
 )
 
+clientDocumentsRouter.get(
+    '/download/:clientId/:documentId',
+    verifyToken,
+    verifyExpireClientDebtMiddleware,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientDocumentsController.ClientDocumentUrl
+)
+
+clientDocumentsRouter.get(
+    '/',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientDocumentsController.getAll
+)
+
 clientDocumentsRouter.post(
     '/add',
     verifyToken,

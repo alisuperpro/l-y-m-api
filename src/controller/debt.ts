@@ -26,11 +26,16 @@ export class DebtController {
 
         const createdAt = new Date().toISOString()
 
+        console.log({
+            user,
+            body: req.body,
+        })
+
         const [error, result] = await DebtModel.add({
             amount,
             clientId,
             createdAt,
-            createdBy: user.id,
+            createdBy: user.id || user.employee_id,
             description: description === undefined ? null : description,
             //@ts-ignore
             status: stateResult.id,
@@ -45,7 +50,8 @@ export class DebtController {
 
         appEventEmitter.emit('debtCreated', {
             clientId: clientId,
-            status,
+            //@ts-ignore
+            status: stateResult.id,
             amount,
             debtId: result.id,
             description,
@@ -85,8 +91,13 @@ export class DebtController {
     static async getAllDebtWithAllInfo(req: Request, res: Response) {
         //@ts-ignore
         const { user } = req.session
+        const { order, state } = req.query
         const [error, result] = await DebtModel.getAllDebtWithAllInfo({
             clientId: user.id,
+            //@ts-ignore
+            order: order ?? 'DESC',
+            //@ts-ignore
+            state: state ? state : null,
         })
 
         if (result.length === 0) {
@@ -109,11 +120,13 @@ export class DebtController {
     }
 
     static async getAll(req: Request, res: Response) {
-        const order = req.query.order?.toString() ?? 'DESC'
+        const { order, state } = req.query
 
         const [error, result] = await DebtModel.getAll({
             //@ts-ignore
             order: order ?? 'DESC',
+            //@ts-ignore
+            state: state ? state : null,
         })
 
         if (error) {

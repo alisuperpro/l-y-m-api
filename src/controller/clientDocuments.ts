@@ -91,6 +91,19 @@ export class ClientDocumentsController {
         })
     }
 
+    static async getAll(req: Request, res: Response) {
+        const [err, result] = await ClientDocumentsModel.getAll()
+
+        if (err) {
+            res.status(500).json({ error: 'Error fetching client companies' })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
     static async findById(req: Request, res: Response) {
         const { id } = req.params
         const { error } = idSchema.safeParse(id)
@@ -111,5 +124,31 @@ export class ClientDocumentsController {
         res.json({
             data: result,
         })
+    }
+
+    static async ClientDocumentUrl(req: Request, res: Response) {
+        const { documentId, clientId } = req.params
+
+        const [error, result] =
+            await ClientDocumentsModel.getDocumentByDocumentAndClientId({
+                documentId: documentId,
+                clientId,
+            })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar el archivo',
+            })
+            return
+        }
+
+        if (!result) {
+            res.status(404).json({
+                error: 'No se encontro el archivo',
+            })
+            return
+        }
+
+        res.json({ data: result })
     }
 }

@@ -2,6 +2,7 @@ import { appEventEmitter } from '../events/eventEmitter'
 import { PayModel } from '../models/pay'
 import { Request, Response } from 'express'
 import { StatesModel } from '../models/states'
+import { DebtModel } from '../models/debt'
 
 export class PayController {
     static async add(req: Request, res: Response) {
@@ -37,6 +38,7 @@ export class PayController {
             status: stateResult.id,
         })
 
+        console.log(error)
         if (error) {
             res.status(500).json({
                 error: 'Error al agregar el pago',
@@ -85,7 +87,12 @@ export class PayController {
     }
 
     static async getAll(req: Request, res: Response) {
-        const [error, pays] = await PayModel.getAll()
+        const { orderBy, state } = req.query
+        const [error, pays] = await PayModel.getAll({
+            orderBy: orderBy as 'ASC' | 'DESC',
+            state: state as string,
+            limit: null,
+        })
 
         if (error) {
             res.status(500).json({
@@ -176,6 +183,34 @@ export class PayController {
         //@ts-ignore
         const resource = req.resources
 
+        const [error, result] = await PayModel.getById({ id: payId })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar el pago',
+            })
+            return
+        }
+
+        if (!result) {
+            res.status(404).json({
+                error: 'Pago no encontrado',
+            })
+            return
+        }
+
+        const [debtError, debtResult] = await DebtModel.findById({
+            //@ts-ignore
+            id: result.debt_id,
+        })
+
+        if (debtError) {
+            res.status(500).json({
+                error: 'Error al buscar la deuda',
+            })
+            return
+        }
+
         const [stateError, stateResult] =
             await StatesModel.findBySlugAndResources({
                 slug: 'confirmed',
@@ -212,10 +247,22 @@ export class PayController {
             ...payResult,
         })
 
-        appEventEmitter.emit('debtPaid', {
+        //@ts-ignore
+        if (result.amount === debtResult.amount) {
+            appEventEmitter.emit('debtPaid', {
+                //@ts-ignore
+                debtId: payResult.debt_id,
+            })
+        } else {
             //@ts-ignore
-            debtId: payResult.debt_id,
-        })
+            const newAmount = debtResult.amount - result.amount
+            const verifyAmount = newAmount < 0 ? 0 : newAmount
+            appEventEmitter.emit('Partial payment debt', {
+                //@ts-ignore
+                debtId: payResult.debt_id,
+                amount: verifyAmount,
+            })
+        }
 
         res.json({
             data: payResult,
@@ -224,8 +271,13 @@ export class PayController {
 
     static async getByClientId(req: Request, res: Response) {
         const { clientId } = req.params
+        const { orderBy, state } = req.query
 
-        const [error, pays] = await PayModel.getByClientId({ clientId })
+        const [error, pays] = await PayModel.getByClientId({
+            clientId,
+            orderBy: orderBy as 'ASC' | 'DESC',
+            state: state as string,
+        })
 
         if (error) {
             res.status(500).json({

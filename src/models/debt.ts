@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { db } from '../db/db'
+import { QueryBuilder } from './queryBuilder'
 
 type Order = 'ASC' | 'DESC'
 
@@ -125,32 +126,40 @@ export class DebtModel {
         }
     }
 
-    static async getAllDebtWithAllInfo({ clientId }: { clientId: string }) {
+    static async getAllDebtWithAllInfo({
+        clientId,
+        state,
+        order,
+    }: {
+        clientId: string
+        state?: string
+        order?: 'ASC' | 'DESC'
+    }) {
+        const builder = new QueryBuilder(`${this.tableName} d`)
+
+        builder
+            .select([
+                'd.id AS debt_id',
+                'd.amount',
+                'd.description AS debt_description',
+                'd.created_at AS debt_created_at',
+                'c.name AS client_name',
+                'c.avatar AS client_avatar',
+                'e.name AS created_by_employee_name',
+                's.state AS debt_status',
+            ])
+            .join('clients c', 'd.client_id = c.id')
+            .join('employee e', 'd.created_by = e.id')
+            .join('states s', 'd.status = s.id')
+            .where('d.client_id', clientId)
+        if (state) {
+            builder.where('s.id', state)
+        }
+        builder.orderBy('d.created_at', order)
         try {
             const result = await db.execute({
-                sql: `
-                    SELECT
-                        d.id AS debt_id,
-                        d.amount,
-                        d.description AS debt_description,
-                        d.created_at AS debt_created_at,
-                        c.name AS client_name,
-                        e.name AS created_by_employee_name,
-                        s.state AS debt_status
-                    FROM
-                        "debt" d
-                    JOIN
-                        "clients" c ON d.client_id = c.id
-                    JOIN
-                        "employee" e ON d.created_by = e.id
-                    JOIN
-                        "states" s ON d.status = s.id
-                    WHERE d.client_id = ? 
-                    ORDER BY d.created_at
-                    DESC
-                    ;
-                `,
-                args: [clientId],
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows]
@@ -159,30 +168,38 @@ export class DebtModel {
         }
     }
 
-    static async getAll({ order }: { order: 'ASC' | 'DESC' }) {
+    static async getAll({
+        order,
+        state,
+    }: {
+        order: 'ASC' | 'DESC'
+        state: string | null
+    }) {
+        const builder = new QueryBuilder(`${this.tableName} d`)
+
+        builder
+            .select([
+                'd.id AS debt_id',
+                'd.amount',
+                'd.description AS debt_description',
+                'd.created_at AS debt_created_at',
+                'c.name AS client_name',
+                'c.avatar AS client_avatar',
+                'e.name AS created_by_employee_name',
+                's.state AS debt_status',
+            ])
+            .join('clients c', 'd.client_id = c.id')
+            .join('employee e', 'd.created_by = e.id')
+            .join('states s', 'd.status = s.id')
+        if (state) {
+            builder.where('s.id', state)
+        }
+        builder.orderBy('d.created_at', order)
+
         try {
             const result = await db.execute({
-                sql: `
-                    SELECT
-                        d.id AS debt_id,
-                        d.amount,
-                        d.description AS debt_description,
-                        d.created_at AS debt_created_at,
-                        c.name AS client_name,
-                        e.name AS created_by_employee_name,
-                        s.state AS debt_status
-                    FROM
-                        "debt" d
-                    JOIN
-                        "clients" c ON d.client_id = c.id
-                    JOIN
-                        "employee" e ON d.created_by = e.id
-                    JOIN
-                        "states" s ON d.status = s.id
-                    ORDER BY d.created_at
-                    ${order}
-                    ;
-                `,
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows]
@@ -386,6 +403,24 @@ export class DebtModel {
             await db.execute({
                 sql: `UPDATE ${this.tableName} SET status = ? WHERE id = ?`,
                 args: [status, id],
+            })
+
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
+    static async updateAmount({ id, amount }: { id: string; amount: string }) {
+        try {
+            await db.execute({
+                sql: `UPDATE ${this.tableName} SET amount = ? WHERE id = ?`,
+                args: [amount, id],
             })
 
             const result = await db.execute({

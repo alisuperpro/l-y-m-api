@@ -21,13 +21,14 @@ import { clientCompanyRouter } from '../src/routes/clientCompany'
 import { setupEmailService } from '../src/events/email.services'
 import { setupClientService } from '../src/events/client.services'
 import { setupDebtService } from '../src/events/debt.services'
+import { setupEmployeeService } from '../src/events/employee.services'
 
 const app = express()
 
 dotenv.config()
 
 const originsDev = ['http://localhost:4321']
-const originsProd = ['https://solucioneslym.com']
+const originsProd = [process.env.ACCEPTED_ORIGIN ?? 'https://solucioneslym.com']
 const corsOptions = {
     origin: process.env.NODE_ENV === 'development' ? originsDev : originsProd,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -44,6 +45,7 @@ app.use(cookieParser())
 setupEmailService()
 setupClientService()
 setupDebtService()
+setupEmployeeService()
 
 app.get('/', async (_: any, res: { send: (arg0: string) => void }) => {
     res.send('hello world')

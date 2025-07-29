@@ -80,5 +80,53 @@ export async function setupDebtService() {
         console.log('Deuda actualizada: ', debtResult.id)
     })
 
+    appEventEmitter.on('Partial payment debt', async (data: any) => {
+        console.log(`[Debt Services] Deuda abonada`)
+
+        const [resourceError, resourceResult] = await ResourcesModel.getByName({
+            name: 'debt',
+        })
+
+        if (resourceError) {
+            console.log('Error al buscar el recurso: ', resourceError)
+            return
+        }
+
+        const [stateError, stateResult] =
+            await StatesModel.findBySlugAndResources({
+                //@ts-ignore
+                resources: resourceResult.id,
+                slug: 'pending',
+            })
+
+        const [updateDebtStatusError, updateDebtStatusResult] =
+            await DebtModel.updateStatus({
+                id: data.debtId,
+                //@ts-ignore
+                status: stateResult.id,
+            })
+
+        const [debtError, debtResult] = await DebtModel.updateAmount({
+            id: data.debtId,
+            //@ts-ignore
+            amount: data.amount,
+        })
+
+        if (debtError) {
+            console.log('Error al actualizar el monto de la deuda: ', debtError)
+            return
+        }
+
+        if (updateDebtStatusError) {
+            console.log(
+                'Error al actualizar el estado de la deuda: ',
+                updateDebtStatusError
+            )
+            return
+        }
+
+        console.log('Deuda actualizada: ', debtResult.id)
+    })
+
     console.log('[Debt Services] Escuchando eventos')
 }

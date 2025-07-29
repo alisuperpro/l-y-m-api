@@ -13,7 +13,7 @@ export const verifyToken = (
     res: Response,
     next: NextFunction
 ): void => {
-    const token = req.cookies.access_token
+    const token = req.cookies.access_token ?? req.cookies.client_access_token
 
     // Initialize session
     req.session = {

@@ -5,11 +5,12 @@ import { hash, compare } from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { EmployeeSchema } from '../schemas/employee.schema'
 import { verifyExpireClientDebts } from '../middleware/verifyExpireClientDebt'
+import { appEventEmitter } from '../events/eventEmitter'
 dotenv.config()
 
 export class EmployeeController {
     static async add(req: Request, res: Response) {
-        const { name, username, password, roleId, departmentId } = req.body
+        const { name, username, password, roleId, permissionList } = req.body
         const { error } = EmployeeSchema.safeParse(req.body)
 
         if (error) {
@@ -51,16 +52,28 @@ export class EmployeeController {
                 username,
                 password: hash,
                 roleId,
-                departmentId,
                 created_at,
             })
 
             if (error) {
+                console.log(error)
                 res.status(500).json({
                     error: 'Error al guardar la informacion',
                 })
                 return
             }
+
+            if (!result) {
+                res.status(500).json({
+                    error: 'Error al crear el usuario',
+                })
+                return
+            }
+
+            appEventEmitter.emit('employeeCreated', {
+                permissionList,
+                employeeId: result.id,
+            })
 
             res.json({
                 data: result,
@@ -168,7 +181,6 @@ export class EmployeeController {
         const [error, result] = await EmployeeModel.findByUsernameWithPassword({
             username,
         })
-
         if (error) {
             res.status(500).json({
                 error: 'error al buscar el usuario',
@@ -186,19 +198,20 @@ export class EmployeeController {
         const comparedPassword = await compare(password, result.password)
 
         if (comparedPassword) {
-            const token = jwt.sign(
-                { user: result },
-                process.env.JWT_KEY ?? '',
-                {
-                    expiresIn: '1d',
-                }
-            )
+            const data = {
+                ...result,
+                id: result.employee_id,
+                password: '',
+            }
+            const token = jwt.sign({ user: data }, process.env.JWT_KEY ?? '', {
+                expiresIn: '1d',
+            })
 
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
             }).json({
-                data: { ...result, password: '' },
+                data,
             })
         } else {
             res.status(403).json({
@@ -223,8 +236,14 @@ export class EmployeeController {
             })
             return
         }
+
+        const data = {
+            ...user,
+            id: user.employee_id,
+            name: user.employee_name,
+        }
         res.json({
-            data: user,
+            data,
         })
     }
 

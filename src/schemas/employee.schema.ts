@@ -5,5 +5,4 @@ export const EmployeeSchema = z.object({
     username: z.string().min(2).max(100),
     password: z.string().min(6).max(100),
     roleId: z.string().uuid(),
-    departmentId: z.string().uuid(),
 })

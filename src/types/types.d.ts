@@ -84,7 +84,6 @@ export interface Employee {
     name: string
     username: string
     role_id: string // Foreign key to role.id
-    department_id: string // Foreign key to departments.id
     created_at: string // Assuming VARCHAR stores a date string
 }
 
