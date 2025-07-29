@@ -216,6 +216,7 @@ export class EmployeeController {
                 expires: new Date(Date.now() + 86400000 * 7),
                 partitioned:
                     process.env.NODE_ENV === 'production' ? true : false,
+                domain: process.env.COOKIE_ACCEPTED_DOMAIN,
             }).json({
                 data,
             })
