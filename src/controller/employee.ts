@@ -210,10 +210,10 @@ export class EmployeeController {
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'none',
+                sameSite:
+                    process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                 path: '/',
                 expires: new Date(Date.now() + 86400000 * 7),
-                partitioned: true,
             }).json({
                 data,
             })
