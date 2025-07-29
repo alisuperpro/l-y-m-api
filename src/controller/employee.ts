@@ -211,10 +211,8 @@ export class EmployeeController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'none',
-                domain:
-                    process.env.NODE_ENV === 'production'
-                        ? process.env.COOKIE_ACCEPTED_DOMAIN
-                        : undefined,
+                path: '/',
+                expires: new Date(Date.now() + 86400000 * 7),
             }).json({
                 data,
             })
