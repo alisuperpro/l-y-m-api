@@ -13,7 +13,15 @@ export const verifyToken = (
     res: Response,
     next: NextFunction
 ): void => {
-    const token = req.cookies.access_token ?? req.cookies.client_access_token
+    const cookie = req.cookies.access_token ?? req.cookies.client_access_token
+    let token
+    if (!cookie) {
+        const headerToken = req.headers.authorization
+
+        token = headerToken?.split(' ').pop() ?? ''
+    } else {
+        token = cookie
+    }
 
     // Initialize session
     req.session = {

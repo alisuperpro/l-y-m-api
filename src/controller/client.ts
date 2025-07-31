@@ -395,13 +395,14 @@ export class ClientController {
             res.cookie('client_access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'none',
-                domain:
-                    process.env.NODE_ENV === 'production'
-                        ? process.env.COOKIE_ACCEPTED_DOMAIN
-                        : undefined,
+                sameSite:
+                    process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                path: '/',
+                expires: new Date(Date.now() + 86400000 * 7),
+                priority: 'high',
             }).json({
                 data: result,
+                value: token,
             })
         } else {
             res.status(403).json({
