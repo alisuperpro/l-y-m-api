@@ -52,10 +52,10 @@ export class RoleModel {
         }
     }
 
-    static async findByName({ name }: { name: string }) {
+    static async findByRole({ name }: { name: string }) {
         try {
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE name = ?`,
+                sql: `SELECT * FROM ${this.tableName} WHERE role = ?`,
                 args: [name],
             })
 

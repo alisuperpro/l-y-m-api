@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { UserPermissionModel } from '../models/userPermission'
+import { RolePermissionModel } from '../models/rolePermission'
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
     //@ts-ignore
@@ -7,8 +8,8 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     //@ts-ignore
     const { user } = req.session
 
-    const [error, result] = await UserPermissionModel.getByUserAndPermissionId({
-        userId: user.id || user.employee_id,
+    const [error, result] = await RolePermissionModel.getByRoleAndPermissionId({
+        roleId: user.role_id,
         permissionId: routePermission.id,
     })
 

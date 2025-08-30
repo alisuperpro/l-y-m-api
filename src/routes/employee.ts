@@ -84,6 +84,14 @@ employeeRouter.post(
 employeeRouter.post('/login', EmployeeController.login)
 employeeRouter.post('/logout', EmployeeController.logout)
 
+employeeRouter.put(
+    '/password/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    EmployeeController.updatePassword
+)
+
 if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
     employeeRouter.post('/add-admin', EmployeeController.add)
 }

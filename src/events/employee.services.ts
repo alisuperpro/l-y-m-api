@@ -3,7 +3,7 @@ import { UserPermissionModel } from '../models/userPermission'
 import { appEventEmitter } from './eventEmitter'
 
 export async function setupEmployeeService() {
-    appEventEmitter.on(
+    /* appEventEmitter.on(
         'employeeCreated',
         async ({
             employeeId,
@@ -51,7 +51,7 @@ export async function setupEmployeeService() {
                 return
             }
         }
-    )
+    ) */
 
     console.log('[Employee Services] Escuchando eventos')
 }

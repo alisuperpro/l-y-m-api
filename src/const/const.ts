@@ -7,4 +7,5 @@ export const BUSSINES_DATA = {
     supportEmail: 'soporte@solucioneslym.com',
     supportEmailPassword: process.env.EMAIL_PASSWORD,
     supportEmailName: 'Soluciones L y M',
+    emailHost: process.env.EMAIL_HOST,
 } as const

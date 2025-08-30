@@ -4,12 +4,15 @@ import { BUSSINES_DATA } from '../const/const'
 dotenv.config()
 // Create a test account or replace with real credentials.
 const transporter = nodemailer.createTransport({
-    host: 'solucioneslym.com',
+    host: BUSSINES_DATA.emailHost,
     port: 465,
     secure: true, // true for 465, false for other ports
     auth: {
         user: BUSSINES_DATA.supportEmail,
         pass: BUSSINES_DATA.supportEmailPassword,
+    },
+    tls: {
+        rejectUnauthorized: true, // Temporal para diagnóstico
     },
 })
 export const sendEmail = async ({

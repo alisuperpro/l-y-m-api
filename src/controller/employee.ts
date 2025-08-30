@@ -6,11 +6,13 @@ import jwt from 'jsonwebtoken'
 import { EmployeeSchema } from '../schemas/employee.schema'
 import { verifyExpireClientDebts } from '../middleware/verifyExpireClientDebt'
 import { appEventEmitter } from '../events/eventEmitter'
+import { idSchema } from '../schemas/global.schema'
+import { passwordSchema } from '../schemas/client.schema'
 dotenv.config()
 
 export class EmployeeController {
     static async add(req: Request, res: Response) {
-        const { name, username, password, roleId, permissionList } = req.body
+        const { name, username, password, roleId } = req.body
         const { error } = EmployeeSchema.safeParse(req.body)
 
         if (error) {
@@ -69,11 +71,6 @@ export class EmployeeController {
                 })
                 return
             }
-
-            appEventEmitter.emit('employeeCreated', {
-                permissionList,
-                employeeId: result.id,
-            })
 
             res.json({
                 data: result,
@@ -306,6 +303,55 @@ export class EmployeeController {
 
         res.json({
             data: debtExpired ?? 'No hay deudas',
+        })
+    }
+
+    static async updatePassword(req: Request, res: Response) {
+        const { id } = req.params
+        const { password } = req.body
+
+        const { error: idError } = idSchema.safeParse(id)
+        const { error: passwordError } = passwordSchema.safeParse(password)
+
+        if (passwordError) {
+            res.status(400).json({
+                error: passwordError.issues[0].message,
+            })
+            return
+        }
+
+        if (idError) {
+            res.status(400).json({
+                error: idError.issues[0].message,
+            })
+            return
+        }
+
+        const saltRounds = 10 // SaltRound to encrypt password
+        // const salt = await genSalt(saltRounds); // Generate Salt
+        hash(password, saltRounds, async (err, hash) => {
+            const [clientError, result] = await EmployeeModel.updatePassword({
+                id,
+                newPassword: hash,
+            })
+
+            if (clientError) {
+                res.status(500).json({
+                    error: 'Error al actualizar la contraseña',
+                })
+                return
+            }
+
+            if (!result) {
+                res.status(404).json({
+                    error: 'Admin no encontrado',
+                })
+                return
+            }
+
+            res.json({
+                data: result,
+            })
         })
     }
 }

@@ -66,4 +66,23 @@ export class RolePermissionModel {
             return [err]
         }
     }
+
+    static async getByRoleAndPermissionId({
+        roleId,
+        permissionId,
+    }: {
+        roleId: string
+        permissionId: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE role_id = ? AND permission_id = ?`,
+                args: [roleId, permissionId],
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (err: any) {
+            return [err]
+        }
+    }
 }

@@ -29,7 +29,6 @@ export class ClientDocumentsController {
             !url ||
             !createdBy ||
             !clientId ||
-            !description ||
             !clientCompanyId ||
             !organizationId
         ) {

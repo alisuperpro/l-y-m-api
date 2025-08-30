@@ -17,7 +17,7 @@ export const verifyExpireClientDebtMiddleware = async (
     })
 
     if (debtExpired) {
-        res.status(500).json({
+        res.status(401).json({
             error: debtExpired,
         })
         return

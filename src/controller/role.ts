@@ -5,7 +5,7 @@ export class RoleController {
     static async add(req: Request, res: Response) {
         const { name, description } = req.body
 
-        const [findError, findName] = await RoleModel.findByName({ name })
+        const [findError, findName] = await RoleModel.findByRole({ name })
         if (findName) {
             res.status(403).json({ error: 'El rol ya existe' })
             return

@@ -79,25 +79,6 @@ export class setRoutePermission {
             return
         }
 
-        /* const [error, result] = await RoutePermissionMapModel.getByPermissionId(
-            {
-                permissionId: permissionResult.id,
-            }
-        )
-
-        if (error) {
-            res.status(500).json({
-                error: 'Error al buscar el permiso',
-            })
-            return
-        }
-
-        if(!result){
-            res.status(404).json({
-                error: 'No se encontro el permiso de la ruta'
-            })
-        } */
-
         //@ts-ignore
         req.routePermission = permissionResult
         next()

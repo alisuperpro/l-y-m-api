@@ -336,11 +336,15 @@ export function setupEmailService() {
 </body>
 </html>`
 
-        await sendEmail({
-            to: client.email,
-            subject: 'Soluciones L y M - Soporte, tu nueva contraseña',
-            body: template,
-        })
+        try {
+            await sendEmail({
+                to: client.email,
+                subject: 'Soluciones L y M - Soporte, tu nueva contraseña',
+                body: template,
+            })
+        } catch (err) {
+            console.log({ err })
+        }
     })
 
     appEventEmitter.on('debtCreated', async (data: any) => {

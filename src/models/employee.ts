@@ -154,6 +154,28 @@ export class EmployeeModel {
         }
     }
 
+    static async updatePassword({
+        id,
+        newPassword,
+    }: {
+        id: string
+        newPassword: string
+    }) {
+        try {
+            await db.execute({
+                sql: `UPDATE ${this.tableName} SET password = ? WHERE id = ?`,
+                args: [newPassword, id],
+            })
+            const result = await db.execute({
+                sql: `SELECT id, name, username FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+            return [undefined, result.rows[0]]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
     static async delete({ id }: { id: string }) {
         try {
             const result = await db.execute({

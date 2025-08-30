@@ -22,7 +22,7 @@ export class ClientDocumentsModel {
         createdBy: string
         clientId: string
         createdAt: string
-        description: string
+        description?: string
         clientCompanyId: string
         organizationId: string
     }) {
@@ -38,7 +38,7 @@ export class ClientDocumentsModel {
                     createdBy,
                     clientId,
                     createdAt,
-                    description,
+                    description ? description : '',
                     clientCompanyId,
                     organizationId,
                 ],

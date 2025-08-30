@@ -12,6 +12,7 @@ import dotenv from 'dotenv'
 import { generatePassword } from '../utils/generatePassword'
 import { appEventEmitter } from '../events/eventEmitter'
 import { StatesModel } from '../models/states'
+import { RoleModel } from '../models/role'
 dotenv.config()
 
 export class ClientController {
@@ -81,6 +82,7 @@ export class ClientController {
         const created_at = new Date().toISOString()
 
         const password = generatePassword()
+        console.log(password)
 
         const saltRounds = 10 // SaltRound to encrypt password
         // const salt = await genSalt(saltRounds); // Generate Salt
@@ -90,6 +92,11 @@ export class ClientController {
                     error: 'Error al encriptar la password',
                 })
             }
+
+            const [roleError, roleResult] = await RoleModel.findByRole({
+                name: 'client',
+            })
+
             const [error, result] = await ClientModel.add({
                 name,
                 username,
@@ -100,6 +107,7 @@ export class ClientController {
                 avatar,
                 //@ts-ignore
                 accountState: stateResult.id,
+                roleId: roleResult.id,
             })
             if (error) {
                 res.status(500).json({
