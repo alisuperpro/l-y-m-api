@@ -28,7 +28,7 @@ const app = express()
 dotenv.config()
 
 const originsDev = ['http://localhost:4321']
-const originsProd = process.env.ACCEPTED_ORIGIN.split(",") ?? ["*"]
+const originsProd = process.env.ACCEPTED_ORIGIN?.split(",") ?? ["*"]
 const corsOptions = {
     origin: process.env.NODE_ENV === 'development' ? originsDev : originsProd,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
