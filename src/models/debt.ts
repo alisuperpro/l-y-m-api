@@ -27,6 +27,7 @@ export class DebtModel {
         description,
         createdBy,
         status,
+        currencyId,
     }: {
         amount: number
         clientId: string
@@ -34,12 +35,13 @@ export class DebtModel {
         description: string | null
         createdBy: string
         status: string
+        currencyId: string
     }) {
         const id = randomUUID()
 
         try {
             await db.execute({
-                sql: `INSERT INTO ${this.tableName} (id, amount, client_id, created_at, description, created_by, status) VALUES (?,?,?,?,?,?,?)`,
+                sql: `INSERT INTO ${this.tableName} (id, amount, client_id, created_at, description, created_by, status, currency) VALUES (?,?,?,?,?,?,?,?)`,
                 args: [
                     id,
                     amount,
@@ -48,12 +50,36 @@ export class DebtModel {
                     description,
                     createdBy,
                     status,
+                    currencyId,
                 ],
             })
+            const builder = new QueryBuilder(`${this.tableName} d`)
+
+            builder
+                .select([
+                    'd.id AS debt_id',
+                    'd.amount',
+                    'd.description AS debt_description',
+                    'd.created_at AS debt_created_at',
+                    'c.name AS client_name',
+                    'c.avatar AS client_avatar',
+                    'c.email',
+                    'c.id as client_id',
+                    'e.name AS created_by_employee_name',
+                    's.state AS debt_status',
+                    'currency.long_name',
+                    'currency.short_name',
+                    'currency.id as currency_id',
+                ])
+                .join('clients c', 'd.client_id = c.id')
+                .join('employee e', 'd.created_by = e.id')
+                .join('states s', 'd.status = s.id')
+                .join('currency', 'd.currency = currency.id')
+                .where('d.id', id)
 
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
-                args: [id],
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows[0]]
@@ -64,28 +90,32 @@ export class DebtModel {
 
     static async findById({ id }: { id: string }) {
         try {
+            const builder = new QueryBuilder(`${this.tableName} d`)
+
+            builder
+                .select([
+                    'd.id AS debt_id',
+                    'd.amount',
+                    'd.description AS debt_description',
+                    'd.created_at AS debt_created_at',
+                    'c.name AS client_name',
+                    'c.avatar AS client_avatar',
+                    'e.name AS created_by_employee_name',
+                    's.state AS debt_status',
+                    'currency.long_name',
+                    'currency.short_name',
+                    'currency.id as currency_id',
+                ])
+                .join('clients c', 'd.client_id = c.id')
+                .join('employee e', 'd.created_by = e.id')
+                .join('states s', 'd.status = s.id')
+                .join('currency', 'd.currency = currency.id')
+                .where('d.id', id)
+                .orderBy('d.created_at', 'DESC')
+
             const result = await db.execute({
-                sql: `SELECT
-                        d.id AS debt_id,
-                        d.amount,
-                        d.description AS debt_description,
-                        d.created_at AS debt_created_at,
-                        c.name AS client_name,
-                        e.name AS created_by_employee_name,
-                        s.state AS debt_status
-                    FROM
-                        "debt" d
-                    JOIN
-                        "clients" c ON d.client_id = c.id
-                    JOIN
-                        "employee" e ON d.created_by = e.id
-                    JOIN
-                        "states" s ON d.status = s.id
-                    WHERE d.id = ? 
-                    ORDER BY d.created_at
-                    DESC
-                    ;`,
-                args: [id],
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows[0]]
@@ -147,10 +177,14 @@ export class DebtModel {
                 'c.avatar AS client_avatar',
                 'e.name AS created_by_employee_name',
                 's.state AS debt_status',
+                'currency.long_name',
+                'currency.short_name',
+                'currency.id as currency_id',
             ])
             .join('clients c', 'd.client_id = c.id')
             .join('employee e', 'd.created_by = e.id')
             .join('states s', 'd.status = s.id')
+            .join('currency', 'd.currency = currency.id')
             .where('d.client_id', clientId)
         if (state) {
             builder.where('s.id', state)
@@ -187,10 +221,15 @@ export class DebtModel {
                 'c.avatar AS client_avatar',
                 'e.name AS created_by_employee_name',
                 's.state AS debt_status',
+                'currency.long_name',
+                'currency.short_name',
+                'currency.id as currency_id',
             ])
             .join('clients c', 'd.client_id = c.id')
             .join('employee e', 'd.created_by = e.id')
             .join('states s', 'd.status = s.id')
+            .join('currency', 'd.currency = currency.id')
+
         if (state) {
             builder.where('s.id', state)
         }

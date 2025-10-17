@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { ClientDocumentsModel } from '../models/clientDocuments'
 import { nameSchema } from '../schemas/global.schema'
 import { idSchema } from '../schemas/client.schema'
+import { appEventEmitter } from '../events/eventEmitter'
 
 export class ClientDocumentsController {
     static async add(req: Request, res: Response) {
@@ -59,6 +60,15 @@ export class ClientDocumentsController {
             return
         }
 
+        appEventEmitter.emit('notify client document uploaded', {
+            clientId,
+            url,
+            clientCompanyId,
+            filename: name,
+            createdAt,
+            orgId: organizationId,
+        })
+
         res.json({
             data: result,
         })
@@ -66,6 +76,7 @@ export class ClientDocumentsController {
 
     static async findByClientId(req: Request, res: Response) {
         const { clientId } = req.params
+        const { order, orgId, companyId } = req.query
 
         const { error } = idSchema.safeParse(clientId)
         if (error) {
@@ -77,6 +88,10 @@ export class ClientDocumentsController {
 
         const [err, result] = await ClientDocumentsModel.findByClientId({
             clientId,
+            companyId: companyId?.toString() || undefined,
+            orgId: orgId?.toString() || undefined,
+            //@ts-ignore
+            order: order || 'ASC',
         })
         if (err) {
             res.status(500).json({

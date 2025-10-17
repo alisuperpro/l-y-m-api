@@ -94,7 +94,17 @@ export class ClientDocumentsModel {
         }
     }
 
-    static async findByClientId({ clientId }: { clientId: string }) {
+    static async findByClientId({
+        clientId,
+        order,
+        orgId,
+        companyId,
+    }: {
+        clientId: string
+        order?: 'ASC' | 'DESC'
+        orgId?: string
+        companyId?: string
+    }) {
         const builder = new QueryBuilder(this.tableName)
 
         builder
@@ -122,6 +132,19 @@ export class ClientDocumentsModel {
             .join('clients', 'clients.id = client_documents.client_id')
             .join('employee', 'employee.id = client_documents.created_by')
             .where('clients.id', clientId)
+
+        if (order) {
+            builder.orderBy('client_documents.created_at', order)
+        }
+
+        if (orgId) {
+            builder.where('client_documents.organization_id', orgId)
+        }
+
+        if (companyId) {
+            builder.where('client_documents.client_company_id', companyId)
+        }
+
         try {
             const result = await db.execute({
                 sql: builder.build().sql,

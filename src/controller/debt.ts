@@ -3,12 +3,13 @@ import { DebtModel } from '../models/debt'
 import { CanApproveOtherDebtsModel } from '../models/canApproveOtherDebts'
 import { appEventEmitter } from '../events/eventEmitter'
 import { StatesModel } from '../models/states'
+import { CurrencyModel } from '../models/currency'
 
 export class DebtController {
     static async add(req: Request, res: Response) {
         //@ts-ignore
         const { user } = req.session
-        const { amount, clientId, description } = req.body
+        const { amount, clientId, description, currencyId } = req.body
 
         const [stateError, stateResult] =
             await StatesModel.findBySlugAndResources({
@@ -26,10 +27,14 @@ export class DebtController {
 
         const createdAt = new Date().toISOString()
 
-        console.log({
-            user,
-            body: req.body,
-        })
+        const [currencyErr] = await CurrencyModel.getById({ id: currencyId })
+
+        if (currencyErr) {
+            res.status(500).json({
+                error: 'Error al buscar la moneda',
+            })
+            return
+        }
 
         const [error, result] = await DebtModel.add({
             amount,
@@ -39,7 +44,10 @@ export class DebtController {
             description: description === undefined ? null : description,
             //@ts-ignore
             status: stateResult.id,
+            currencyId,
         })
+
+        console.log(error)
 
         if (error) {
             res.status(500).json({
@@ -53,9 +61,9 @@ export class DebtController {
             //@ts-ignore
             status: stateResult.id,
             amount,
-            debtId: result.id,
-            description,
-            createdAt,
+            debtId: result.debt_id,
+            description: result.debt_description,
+            createdAt: result.debt_created_at,
             expireIn: 'La deuda expira a los 30 dias de la creacion',
         })
 

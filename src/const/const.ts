@@ -9,3 +9,5 @@ export const BUSSINES_DATA = {
     supportEmailName: 'Soluciones L y M',
     emailHost: process.env.EMAIL_HOST,
 } as const
+
+export const EnDivisasAPI_URL = process.env.EN_DIVISASA_API_URL

@@ -16,6 +16,13 @@ payRouter.get(
     PayController.getAll
 )
 payRouter.get(
+    '/payment_method',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    PayController.getAllPaymentMethod
+)
+payRouter.get(
     '/:id',
     verifyToken,
     setRoutePermission.loadRoutePermission,

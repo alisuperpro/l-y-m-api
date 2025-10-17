@@ -22,6 +22,7 @@ import { setupEmailService } from '../src/events/email.services'
 import { setupClientService } from '../src/events/client.services'
 import { setupDebtService } from '../src/events/debt.services'
 import { setupEmployeeService } from '../src/events/employee.services'
+import { currencyRouter } from '../src/routes/currency'
 
 const app = express()
 
@@ -68,6 +69,7 @@ app.use('/states', statesRouter)
 app.use('/organizations', organizationsRouter)
 app.use('/client-documents', clientDocumentsRouter)
 app.use('/client-company', clientCompanyRouter)
+app.use('/currency', currencyRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500

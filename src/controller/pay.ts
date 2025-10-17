@@ -3,6 +3,8 @@ import { PayModel } from '../models/pay'
 import { Request, Response } from 'express'
 import { StatesModel } from '../models/states'
 import { DebtModel } from '../models/debt'
+import { PaymentMethodModel } from '../models/payment_method'
+import { EnDivisasAPI_URL } from '../const/const'
 
 export class PayController {
     static async add(req: Request, res: Response) {
@@ -14,6 +16,8 @@ export class PayController {
             description,
             amount,
             debtId,
+            paymentMethod,
+            currencyId,
         } = req.body
 
         const createdAt = new Date().toISOString()
@@ -36,9 +40,10 @@ export class PayController {
             debtId,
             //@ts-ignore
             status: stateResult.id,
+            paymentMethod,
+            currencyId,
         })
 
-        console.log(error)
         if (error) {
             res.status(500).json({
                 error: 'Error al agregar el pago',
@@ -247,21 +252,78 @@ export class PayController {
             ...payResult,
         })
 
+        const debtCurrency = debtResult.currency_id
         //@ts-ignore
-        if (result.amount === debtResult.amount) {
-            appEventEmitter.emit('debtPaid', {
-                //@ts-ignore
-                debtId: payResult.debt_id,
-            })
-        } else {
+        const payCurrency = result.currency
+
+        if (debtCurrency === payCurrency) {
             //@ts-ignore
-            const newAmount = debtResult.amount - result.amount
-            const verifyAmount = newAmount < 0 ? 0 : newAmount
-            appEventEmitter.emit('Partial payment debt', {
+            if (result.amount === debtResult.amount) {
+                appEventEmitter.emit('debtPaid', {
+                    //@ts-ignore
+                    debtId: payResult.debt_id,
+                })
+            } else {
                 //@ts-ignore
-                debtId: payResult.debt_id,
-                amount: verifyAmount,
+                const newAmount = debtResult.amount - result.amount
+                const verifyAmount = newAmount < 0 ? 0 : newAmount
+                appEventEmitter.emit('Partial payment debt', {
+                    //@ts-ignore
+                    debtId: payResult.debt_id,
+                    amount: verifyAmount,
+                })
+            }
+        } else {
+            const response = await fetch(EnDivisasAPI_URL ?? '')
+            const json = await response.json()
+            console.log({
+                api: response.status,
             })
+
+            const defaultCurrency =
+                debtResult.short_name === 'USD' ? debtResult.short_name : 'USD'
+
+            const getCurrencyValue = json.data.find(
+                (el: any) => el.short_name === defaultCurrency
+            )
+
+            if (!getCurrencyValue) {
+                res.status(500).json({
+                    error: 'Error al obtener la tasa del dia',
+                })
+                return
+            }
+
+            const transform = getCurrencyValue.price.replace(',', '.')
+
+            const convertToNumber = Number(Number(transform).toFixed(2))
+
+            let calc
+
+            if (debtResult.short_name === 'USD') {
+                //@ts-ignore
+                calc = result.amount * convertToNumber
+            } else {
+                //@ts-ignore
+                calc = convertToNumber / result.amount
+            }
+
+            //@ts-ignore
+            if (calc === debtResult.amount) {
+                appEventEmitter.emit('debtPaid', {
+                    //@ts-ignore
+                    debtId: payResult.debt_id,
+                })
+            } else {
+                //@ts-ignore
+                const newAmount = debtResult.amount - calc
+                const verifyAmount = newAmount < 0 ? 0 : newAmount
+                appEventEmitter.emit('Partial payment debt', {
+                    //@ts-ignore
+                    debtId: payResult.debt_id,
+                    amount: verifyAmount,
+                })
+            }
         }
 
         res.json({
@@ -295,6 +357,21 @@ export class PayController {
 
         res.status(200).json({
             data: pays,
+        })
+    }
+
+    static async getAllPaymentMethod(req: Request, res: Response) {
+        const [error, result] = await PaymentMethodModel.getAll()
+
+        if (error) {
+            res.status(500).json({
+                error: 'error al obtener los metodos de pago',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
         })
     }
 }

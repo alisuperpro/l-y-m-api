@@ -1,5 +1,7 @@
 import { BUSSINES_DATA } from '../const/const'
 import { ClientModel } from '../models/client'
+import { ClientCompanyModel } from '../models/clientCompany'
+import { OrganizationsModel } from '../models/organizations'
 import { StatesModel } from '../models/states'
 import { sendEmail } from '../services/email.services'
 
@@ -352,14 +354,6 @@ export function setupEmailService() {
             `[Email Service] Enviando correo para notificar la nueva deuda al cliente ${data.clientId}`
         )
 
-        const [error, result] = await ClientModel.findClientById({
-            id: data.clientId,
-        })
-        if (error) {
-            console.log('error cliente no encontrado')
-            return
-        }
-
         const [statusError, statusResult] = await StatesModel.findById({
             id: data.status,
         })
@@ -370,7 +364,7 @@ export function setupEmailService() {
         }
 
         const template = templates.debtCreated
-            .replace('[Nombre del Usuario]', result.client.name)
+            .replace('[Nombre del Usuario]', data.client_name)
             .replace('[Número de Deuda]', data.debtId)
             .replace(
                 '[Concepto de la Deuda]',
@@ -397,7 +391,7 @@ export function setupEmailService() {
 
         try {
             await sendEmail({
-                to: result.client.email,
+                to: data.email,
                 subject: 'Soluciones L y M - Soporte, Nueva Deuda Creada',
                 body: template,
             })
@@ -411,16 +405,8 @@ export function setupEmailService() {
             `[Email Service] Enviando correo para notificar que el pago de la deuda a sido aprovado al cliente ${data.client_id}`
         )
 
-        const [error, result] = await ClientModel.findClientById({
-            id: data.client_id,
-        })
-        if (error) {
-            console.log('error cliente no encontrado')
-            return
-        }
-
         const template = templates.aprovedPay
-            .replace('[Nombre del Cliente]', result.client.name)
+            .replace('[Nombre del Cliente]', data.name)
             .replace('[Número de Referencia de Deuda]', data.debt_id)
             .replace(
                 '[Enlace a su Portal de Cliente o Contacto]',
@@ -438,11 +424,158 @@ export function setupEmailService() {
             )
 
         await sendEmail({
-            to: result.client.email,
+            to: data.email,
             subject: 'Soluciones L y M - Soporte, Pago aprovado',
             body: template,
         })
     })
+
+    appEventEmitter.on(
+        'notify client document uploaded',
+        async ({ clientId, clientCompanyId, filename, createdAt, orgId }) => {
+            let content = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Archivo Subido Exitosamente!</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+            <td align="center" style="padding: 20px 0 30px 0;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    
+                    <tr>
+                        <td align="center" style="padding: 40px 0 30px 0; background-color: #0056b3; border-radius: 8px 8px 0 0;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Notificación de Archivo Subido 📁</h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 40px 30px 40px 30px;">
+                            <p style="color: #333333; margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">
+                                Estimado/a [Nombre del Cliente],
+                            </p>
+                            <p style="color: #333333; margin: 0 0 25px 0; font-size: 16px; line-height: 1.6;">
+                                Queremos notificarle que se ha subido un nuevo archivo a su espacio de cliente, específicamente asociado a la empresa [Nombre de la Empresa del Cliente].
+                            </p>
+
+                            
+
+                            <h3 style="color: #0056b3; margin: 0 0 10px 0; font-size: 18px;">Detalles del Archivo:</h3>
+                            <table border="0" cellpadding="5" cellspacing="0" width="100%" style="color: #333333; font-size: 15px; border-collapse: collapse;">
+                                <tr>
+                                    <td width="30%" style="font-weight: bold; padding: 8px 0;">Empresa Destino:</td>
+                                    <td width="70%" style="padding: 8px 0;">[Nombre de la Empresa del Cliente]</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; padding: 8px 0;">Nombre del Archivo:</td>
+                                    <td style="padding: 8px 0;">[Nombre del Archivo.pdf]</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; padding: 8px 0;">Subido por:</td>
+                                    <td style="padding: 8px 0;">[Nombre de la Persona o Sistema]</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; padding: 8px 0;">Organización:</td>
+                                    <td style="padding: 8px 0;">[Tu Organización/Departamento]</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; padding: 8px 0;">Fecha de Subida:</td>
+                                    <td style="padding: 8px 0;">[Fecha y Hora]</td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #333333; margin: 25px 0 0 0; font-size: 16px; line-height: 1.6;">
+                                Si tiene alguna pregunta o necesita asistencia, no dude en contactarnos.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td bgcolor="#eeeeee" align="center" style="padding: 20px 30px 20px 30px; border-radius: 0 0 8px 8px;">
+                            <p style="margin: 0; font-size: 14px; color: #555555;">
+                                Atentamente,<br>
+                            [Nombre de tu Empresa/Contacto]
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>`
+
+            const [error, result] = await ClientModel.findClientById({
+                id: clientId,
+            })
+            if (error) {
+                console.log('error cliente no encontrado')
+                return
+            }
+
+            //@ts-ignore
+            const [clientCompanError, clientCompanyResult]: [any, any] =
+                await ClientCompanyModel.findById({ id: clientCompanyId })
+
+            if (clientCompanError) {
+                console.log('error empresa del cliente no encontrado')
+                return
+            }
+
+            //@ts-ignore
+            const [orgError, orgResult]: [any, any] =
+                await OrganizationsModel.findById({
+                    id: orgId,
+                })
+
+            if (orgError) {
+                console.log('error organizacion no encontrado')
+                return
+            }
+
+            content = content.replace(
+                /\[Nombre del Cliente\]/g,
+                result.client.name || 'Cliente'
+            )
+            content = content.replace(
+                /\[Nombre de la Empresa del Cliente\]/g,
+                clientCompanyResult[0]?.name || 'Empresa del Cliente'
+            )
+            content = content.replace(
+                /\[Nombre del Archivo\.pdf\]/g,
+                filename || 'Documento Subido'
+            )
+            content = content.replace(
+                /\[Fecha y Hora\]/g,
+                createdAt || new Date().toLocaleString()
+            )
+            content = content.replace(
+                /\[Nombre de la Persona o Sistema\]/g,
+                'Soluciones L y M'
+            )
+            content = content.replace(
+                /\[Tu Organización\/Departamento\]/g,
+                orgResult?.name || 'Mi Organización'
+            )
+            content = content.replace(
+                /\[Nombre de tu Empresa\/Contacto\]/g,
+                'Soporte - Soluciones L y M'
+            )
+            content = content.replace(/\[Tu Dirección\]/g, 'Soluciones L y M')
+
+            await sendEmail({
+                to: result.client.email,
+                subject: 'Soluciones L y M - Soporte, Archivo',
+                body: content,
+            })
+        }
+    )
 
     console.log('[Email Service] Escuchando eventos')
 }

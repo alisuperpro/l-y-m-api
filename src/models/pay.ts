@@ -15,6 +15,8 @@ export class PayModel {
         amount,
         debtId,
         status,
+        paymentMethod,
+        currencyId,
     }: {
         referenceCode: string
         payDate: string
@@ -25,13 +27,15 @@ export class PayModel {
         amount: number
         debtId: string
         status: string
+        paymentMethod: string
+        currencyId: string
     }) {
         const id = randomUUID()
 
         try {
             await db.execute({
                 sql: `INSERT INTO ${this.tableName}
-                (id, reference_code, pay_date, created_at, client_id, photo_url, description, amount, debt_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (id, reference_code, pay_date, created_at, client_id, photo_url, description, amount, debt_id, status, payment_method, currency) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     id,
                     referenceCode,
@@ -43,6 +47,8 @@ export class PayModel {
                     amount,
                     debtId,
                     status,
+                    paymentMethod,
+                    currencyId,
                 ],
             })
 
@@ -83,10 +89,14 @@ export class PayModel {
                         p.description,
                         p.debt_id,
                         p.amount,
+                        currency.long_name
+                        currency.short_name
                         s.state AS status_name
                             FROM pay AS p
                             JOIN states AS s
                             ON p.status = s.state
+                            JOIN currency
+                            ON p.currency = currency.id
                             WHERE
                         s.state = ?`,
                 args: [status],
@@ -119,13 +129,24 @@ export class PayModel {
                 'pay.description',
                 'pay.debt_id',
                 'pay.amount',
+                'payment_method.name as payment_name',
                 'states.state',
                 'states.slug',
                 'clients.name',
                 'clients.avatar',
+                'currency.long_name',
+                'currency.short_name',
+                'currency.id as currency_id',
             ])
             .join('clients', 'pay.client_id = clients.id', 'INNER')
             .join('states', 'pay.status = states.id', 'INNER')
+            .join(
+                'payment_method',
+                'pay.payment_method = payment_method.id',
+                'INNER'
+            )
+            .join('currency', 'pay.currency = currency.id')
+
             .orderBy('pay.created_at', orderBy)
         if (limit) {
             builder.limit(limit)
@@ -169,13 +190,23 @@ export class PayModel {
                 'pay.description',
                 'pay.debt_id',
                 'pay.amount',
+                'payment_method.name as payment_name',
                 'states.state',
                 'states.slug',
                 'clients.name',
                 'clients.avatar',
+                'currency.long_name',
+                'currency.short_name',
+                'currency.id as currency_id',
             ])
             .join('clients', 'pay.client_id = clients.id', 'INNER')
             .join('states', 'pay.status = states.id', 'INNER')
+            .join(
+                'payment_method',
+                'pay.payment_method = payment_method.id',
+                'INNER'
+            )
+            .join('currency', 'pay.currency = currency.id')
             .orderBy('pay.created_at', orderBy)
             .where('pay.client_id', clientId)
         if (limit) {
@@ -204,9 +235,42 @@ export class PayModel {
                 args: [status, id],
             })
 
+            const builder = new QueryBuilder(this.tableName)
+
+            builder
+                .select([
+                    'pay.id',
+                    'pay.reference_code',
+                    'pay.pay_date',
+                    'pay.created_at',
+                    'pay.photo_url',
+                    'pay.description',
+                    'pay.debt_id',
+                    'pay.amount',
+                    'payment_method.name as payment_name',
+                    'states.state',
+                    'states.slug',
+                    'clients.name',
+                    'clients.avatar',
+                    'clients.email',
+                    'clients.id as client_id',
+                    'currency.long_name',
+                    'currency.short_name',
+                    'currency.id as currency_id',
+                ])
+                .join('clients', 'pay.client_id = clients.id', 'INNER')
+                .join('states', 'pay.status = states.id', 'INNER')
+                .join(
+                    'payment_method',
+                    'pay.payment_method = payment_method.id',
+                    'INNER'
+                )
+                .join('currency', 'pay.currency = currency.id')
+                .where('pay.id', id)
+
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
-                args: [id],
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows[0]]
