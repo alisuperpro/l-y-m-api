@@ -65,9 +65,40 @@ export class PayModel {
 
     static async getById({ id }: { id: string }) {
         try {
+            const builder = new QueryBuilder(this.tableName)
+
+            builder
+                .select([
+                    'pay.id',
+                    'pay.reference_code',
+                    'pay.pay_date',
+                    'pay.created_at',
+                    'pay.photo_url',
+                    'pay.description',
+                    'pay.debt_id',
+                    'pay.amount',
+                    'payment_method',
+                    'payment_method.name as payment_name',
+                    'states.state',
+                    'states.slug',
+                    'clients.name',
+                    'clients.avatar',
+                    'currency.long_name',
+                    'currency.short_name',
+                    'currency.id as currency_id',
+                ])
+                .join('clients', 'pay.client_id = clients.id', 'INNER')
+                .join('states', 'pay.status = states.id', 'INNER')
+                .join(
+                    'payment_method',
+                    'pay.payment_method = payment_method.id',
+                    'INNER'
+                )
+                .join('currency', 'pay.currency = currency.id')
+                .where('pay.id', id)
             const result = await db.execute({
-                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
-                args: [id],
+                sql: builder.build().sql,
+                args: builder.build().args,
             })
 
             return [undefined, result.rows[0]]
@@ -129,6 +160,7 @@ export class PayModel {
                 'pay.description',
                 'pay.debt_id',
                 'pay.amount',
+                'payment_method',
                 'payment_method.name as payment_name',
                 'states.state',
                 'states.slug',

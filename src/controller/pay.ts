@@ -254,7 +254,7 @@ export class PayController {
 
         const debtCurrency = debtResult.currency_id
         //@ts-ignore
-        const payCurrency = result.currency
+        const payCurrency = result.currency_id
 
         if (debtCurrency === payCurrency) {
             //@ts-ignore
@@ -276,9 +276,6 @@ export class PayController {
         } else {
             const response = await fetch(EnDivisasAPI_URL ?? '')
             const json = await response.json()
-            console.log({
-                api: response.status,
-            })
 
             const defaultCurrency =
                 debtResult.short_name === 'USD' ? debtResult.short_name : 'USD'
@@ -300,13 +297,31 @@ export class PayController {
 
             let calc
 
-            if (debtResult.short_name === 'USD') {
+            if (
+                debtResult.short_name === 'USD' &&
                 //@ts-ignore
-                calc = result.amount * convertToNumber
-            } else {
+                result.short_name === 'VES'
+            ) {
+                //@ts-ignore
+                calc = result.amount / convertToNumber
+                //@ts-ignore
+            } else if (result.short_name === 'VES') {
                 //@ts-ignore
                 calc = convertToNumber / result.amount
+            } else if (
+                //@ts-ignore
+                result.short_name === 'USD'
+            ) {
+                //@ts-ignore
+                calc = result.amount / convertToNumber
+            } else {
+                res.status(500).json({
+                    error: 'Error al hacer la conversion',
+                })
+                return
             }
+
+            calc = Number(calc.toFixed(2))
 
             //@ts-ignore
             if (calc === debtResult.amount) {
@@ -317,7 +332,9 @@ export class PayController {
             } else {
                 //@ts-ignore
                 const newAmount = debtResult.amount - calc
-                const verifyAmount = newAmount < 0 ? 0 : newAmount
+
+                const round = Number(newAmount.toFixed(2))
+                const verifyAmount = round < 0 ? 0 : round
                 appEventEmitter.emit('Partial payment debt', {
                     //@ts-ignore
                     debtId: payResult.debt_id,

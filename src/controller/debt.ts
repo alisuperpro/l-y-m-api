@@ -47,8 +47,6 @@ export class DebtController {
             currencyId,
         })
 
-        console.log(error)
-
         if (error) {
             res.status(500).json({
                 error: 'Error al crear la deuda',
