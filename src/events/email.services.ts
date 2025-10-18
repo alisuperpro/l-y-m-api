@@ -402,7 +402,7 @@ export function setupEmailService() {
 
     appEventEmitter.on('payApproved', async (data: any) => {
         console.log(
-            `[Email Service] Enviando correo para notificar que el pago de la deuda a sido aprovado al cliente ${data.client_id}`
+            `[Email Service] Enviando correo para notificar que el pago de la deuda a sido aprobado al cliente ${data.client_id}`
         )
 
         const template = templates.aprovedPay
@@ -425,7 +425,7 @@ export function setupEmailService() {
 
         await sendEmail({
             to: data.email,
-            subject: 'Soluciones L y M - Soporte, Pago aprovado',
+            subject: 'Soluciones L y M - Soporte, Pago aprobado',
             body: template,
         })
     })
