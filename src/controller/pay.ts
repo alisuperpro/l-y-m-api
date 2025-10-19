@@ -259,9 +259,13 @@ export class PayController {
         if (debtCurrency === payCurrency) {
             //@ts-ignore
             if (result.amount === debtResult.amount) {
+                //@ts-ignore
+                const newAmount = debtResult.amount - result.amount
+                const verifyAmount = newAmount < 0 ? 0 : newAmount
                 appEventEmitter.emit('debtPaid', {
                     //@ts-ignore
                     debtId: payResult.debt_id,
+                    amount: verifyAmount,
                 })
             } else {
                 //@ts-ignore
@@ -291,9 +295,11 @@ export class PayController {
                 return
             }
 
-            const transform = getCurrencyValue.price.replace(',', '.')
+            const convert = Number(
+                getCurrencyValue.price.replace(',', '.')
+            ).toFixed(2)
 
-            const convertToNumber = Number(Number(transform).toFixed(2))
+            const convertToNumber = Number(convert)
 
             let calc
 
@@ -308,6 +314,13 @@ export class PayController {
             } else if (result.short_name === 'VES') {
                 //@ts-ignore
                 calc = convertToNumber / result.amount
+            } else if (
+                //@ts-ignore
+                result.short_name === 'USD' &&
+                debtResult.short_name === 'VES'
+            ) {
+                //@ts-ignore
+                calc = result.amount * convertToNumber
             } else if (
                 //@ts-ignore
                 result.short_name === 'USD'
@@ -328,6 +341,7 @@ export class PayController {
                 appEventEmitter.emit('debtPaid', {
                     //@ts-ignore
                     debtId: payResult.debt_id,
+                    amount: 0,
                 })
             } else {
                 //@ts-ignore

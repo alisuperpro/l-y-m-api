@@ -69,6 +69,17 @@ export async function setupDebtService() {
             status: stateResult.id,
         })
 
+        const [amountError, amountResult] = await DebtModel.updateAmount({
+            id: data.debtId,
+            //@ts-ignore
+            amount: data.amount,
+        })
+
+        if (amountError) {
+            console.log('Error al actualizar el monto de la deuda: ', debtError)
+            return
+        }
+
         if (debtError) {
             console.log(
                 'Error al actualizar el estado de la deuda: ',
@@ -106,6 +117,14 @@ export async function setupDebtService() {
                 status: stateResult.id,
             })
 
+        if (updateDebtStatusError) {
+            console.log(
+                'Error al actualizar el estado de la deuda: ',
+                updateDebtStatusError
+            )
+            return
+        }
+
         const [debtError, debtResult] = await DebtModel.updateAmount({
             id: data.debtId,
             //@ts-ignore
@@ -114,14 +133,6 @@ export async function setupDebtService() {
 
         if (debtError) {
             console.log('Error al actualizar el monto de la deuda: ', debtError)
-            return
-        }
-
-        if (updateDebtStatusError) {
-            console.log(
-                'Error al actualizar el estado de la deuda: ',
-                updateDebtStatusError
-            )
             return
         }
 
