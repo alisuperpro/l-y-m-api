@@ -12,7 +12,11 @@ export class FileFormController {
             return
         }
 
-        const slug = name.replaceAll(' ', '-').toLowerCase()
+        const slug = name
+            .replaceAll('/', ' ')
+            .replaceAll('%', '')
+            .replaceAll(' ', '-')
+            .toLowerCase()
 
         const [error, result] = await FileFormModel.add({ name, slug })
 
