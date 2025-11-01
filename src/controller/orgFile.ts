@@ -43,4 +43,28 @@ export class OrgFileController {
             data: result,
         })
     }
+
+    static async getByOrgId(req: Request, res: Response) {
+        const { id: orgId } = req.params
+
+        if (!orgId) {
+            res.status(400).json({
+                error: 'Error falta el id',
+            })
+            return
+        }
+
+        const [error, result] = await OrgFileModel.getByOrg({ orgId })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar la org',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
 }
