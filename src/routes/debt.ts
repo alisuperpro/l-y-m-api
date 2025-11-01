@@ -41,6 +41,14 @@ debtRouter.get(
 )
 
 debtRouter.get(
+    '/state/:state',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.countDebtsByState
+)
+
+debtRouter.get(
     '/:id',
     verifyToken,
     setRoutePermission.loadRoutePermission,

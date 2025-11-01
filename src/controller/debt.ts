@@ -282,4 +282,21 @@ export class DebtController {
             })
         }
     }
+
+    static async countDebtsByState(req: Request, res: Response) {
+        const { state } = req.params
+
+        const [error, result] = await DebtModel.countAllDebtsByState({ state })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar las deudas',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
 }

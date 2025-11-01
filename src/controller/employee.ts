@@ -307,7 +307,8 @@ export class EmployeeController {
     }
 
     static async updatePassword(req: Request, res: Response) {
-        const { id } = req.params
+        //@ts-ignore
+        const id = req.session.user.employee_id
         const { password } = req.body
 
         const { error: idError } = idSchema.safeParse(id)

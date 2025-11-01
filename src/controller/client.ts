@@ -313,7 +313,8 @@ export class ClientController {
     }
 
     static async updatePassword(req: Request, res: Response) {
-        const { id } = req.params
+        //@ts-ignore
+        const { id } = req.session.user
         const { password } = req.body
 
         const { error: idError } = idSchema.safeParse(id)
@@ -393,7 +394,7 @@ export class ClientController {
 
         if (comparedPassword) {
             const token = jwt.sign(
-                { user: result },
+                { user: { ...result, password: '' } },
                 process.env.JWT_KEY ?? '',
                 {
                     expiresIn: '1d',

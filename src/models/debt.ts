@@ -472,4 +472,17 @@ export class DebtModel {
             return [err]
         }
     }
+
+    static async countAllDebtsByState({ state }: { state: string }) {
+        try {
+            const result = await db.execute({
+                sql: `SELECT COUNT(*) AS total FROM ${this.tableName} WHERE status = ?`,
+                args: [state],
+            })
+
+            return [undefined, result.rows]
+        } catch (err) {
+            return [err]
+        }
+    }
 }

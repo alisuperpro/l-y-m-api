@@ -186,7 +186,7 @@ export class ClientModel {
     }) {
         try {
             const result = await db.execute({
-                sql: `SELECT id, name, username, email, created_at, created_by, password, role_id FROM ${this.tableName} WHERE username = ?`,
+                sql: `SELECT id, name, username, email, created_at, created_by, password, role_id, avatar FROM ${this.tableName} WHERE username = ?`,
                 args: [username],
             })
             return [undefined, result.rows[0]]

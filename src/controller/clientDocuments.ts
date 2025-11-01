@@ -15,6 +15,7 @@ export class ClientDocumentsController {
             description,
             clientCompanyId,
             organizationId,
+            fileFormId,
         } = req.body
         const { error } = nameSchema.safeParse(name)
         if (error) {
@@ -50,6 +51,7 @@ export class ClientDocumentsController {
             description,
             clientCompanyId,
             organizationId,
+            fileFormId,
         })
 
         if (err) {
@@ -164,5 +166,42 @@ export class ClientDocumentsController {
         }
 
         res.json({ data: result })
+    }
+
+    static async getByOrgAndSlug(req: Request, res: Response) {
+        const { org, slug } = req.params
+        const { clientId } = req.query
+
+        if (!org || !slug) {
+            res.status(400).json({
+                error: 'Error faltan datos',
+            })
+            return
+        }
+
+        const [error, result] = await ClientDocumentsModel.getByOrgAndSlug({
+            org,
+            slug,
+            clientId: clientId?.toString() ?? undefined,
+        })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al buscar el archivo',
+            })
+            return
+        }
+
+        //@ts-ignore
+        if (result.length <= 0) {
+            res.status(404).json({
+                error: 'No hay documentos',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
     }
 }

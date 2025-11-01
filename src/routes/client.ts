@@ -55,7 +55,7 @@ clientRouter.post('/login', ClientController.login)
 clientRouter.post('/logout', ClientController.logout)
 
 clientRouter.put(
-    '/password/:id',
+    '/password',
     verifyToken,
     setRoutePermission.loadRoutePermission,
     auth,

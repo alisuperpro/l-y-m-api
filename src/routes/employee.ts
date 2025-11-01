@@ -85,7 +85,7 @@ employeeRouter.post('/login', EmployeeController.login)
 employeeRouter.post('/logout', EmployeeController.logout)
 
 employeeRouter.put(
-    '/password/:id',
+    '/password',
     verifyToken,
     setRoutePermission.loadRoutePermission,
     auth,

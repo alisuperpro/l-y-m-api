@@ -133,7 +133,7 @@ export class EmployeeModel {
         builder
             .select([
                 'employee.id as employee_id',
-                'name',
+                'name as employee_name',
                 'username',
                 'password',
                 'role.role as role',

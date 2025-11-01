@@ -23,13 +23,15 @@ import { setupClientService } from '../src/events/client.services'
 import { setupDebtService } from '../src/events/debt.services'
 import { setupEmployeeService } from '../src/events/employee.services'
 import { currencyRouter } from '../src/routes/currency'
+import { fileFormRouter } from '../src/routes/fileForm'
+import { orgFileRouter } from '../src/routes/orgFile'
 
 const app = express()
 
 dotenv.config()
 
 const originsDev = ['http://localhost:4321']
-const originsProd = process.env.ACCEPTED_ORIGIN?.split(",") ?? ["*"]
+const originsProd = process.env.ACCEPTED_ORIGIN?.split(',') ?? ['*']
 const corsOptions = {
     origin: process.env.NODE_ENV === 'development' ? originsDev : originsProd,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -70,6 +72,8 @@ app.use('/organizations', organizationsRouter)
 app.use('/client-documents', clientDocumentsRouter)
 app.use('/client-company', clientCompanyRouter)
 app.use('/currency', currencyRouter)
+app.use('/file-form', fileFormRouter)
+app.use('/org-file', orgFileRouter)
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT ?? 3500

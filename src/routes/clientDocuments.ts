@@ -37,6 +37,23 @@ clientDocumentsRouter.get(
 )
 
 clientDocumentsRouter.get(
+    '/find/:org/:slug',
+    verifyToken,
+    verifyExpireClientDebtMiddleware,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientDocumentsController.getByOrgAndSlug
+)
+
+clientDocumentsRouter.get(
+    '/admin/find/:org/:slug',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientDocumentsController.getByOrgAndSlug
+)
+
+clientDocumentsRouter.get(
     '/',
     verifyToken,
     setRoutePermission.loadRoutePermission,
