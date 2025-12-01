@@ -310,4 +310,55 @@ export class PayModel {
             return [error]
         }
     }
+
+    static async updateAmount({ id, amount }: { id: string; amount: string }) {
+        try {
+            await db.execute({
+                sql: `UPDATE ${this.tableName} SET amount = ? WHERE id = ?`,
+                args: [amount, id],
+            })
+
+            const builder = new QueryBuilder(this.tableName)
+
+            builder
+                .select([
+                    'pay.id',
+                    'pay.reference_code',
+                    'pay.pay_date',
+                    'pay.created_at',
+                    'pay.photo_url',
+                    'pay.description',
+                    'pay.debt_id',
+                    'pay.amount',
+                    'payment_method.name as payment_name',
+                    'states.state',
+                    'states.slug',
+                    'clients.name',
+                    'clients.avatar',
+                    'clients.email',
+                    'clients.id as client_id',
+                    'currency.long_name',
+                    'currency.short_name',
+                    'currency.id as currency_id',
+                ])
+                .join('clients', 'pay.client_id = clients.id', 'INNER')
+                .join('states', 'pay.status = states.id', 'INNER')
+                .join(
+                    'payment_method',
+                    'pay.payment_method = payment_method.id',
+                    'INNER'
+                )
+                .join('currency', 'pay.currency = currency.id')
+                .where('pay.id', id)
+
+            const result = await db.execute({
+                sql: builder.build().sql,
+                args: builder.build().args,
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (error) {
+            return [error]
+        }
+    }
 }

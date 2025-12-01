@@ -67,3 +67,11 @@ payRouter.put(
     auth,
     PayController.approvedPay
 )
+
+payRouter.put(
+    '/update/:id/amount',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    PayController.updateAmount
+)

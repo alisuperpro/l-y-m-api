@@ -362,6 +362,42 @@ export class PayController {
         })
     }
 
+    static async updateAmount(req: Request, res: Response) {
+        const { id: payId } = req.params
+        const { amount } = req.body
+
+        if (!payId) {
+            res.status(400).json({
+                error: 'Missing id',
+            })
+            return
+        }
+
+        if (!amount) {
+            res.status(400).json({
+                error: 'Missing amount',
+            })
+            return
+        }
+
+        const [error, result] = await PayModel.updateAmount({
+            id: payId,
+            amount,
+        })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error to update pay',
+            })
+
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
+
     static async getByClientId(req: Request, res: Response) {
         const { clientId } = req.params
         const { orderBy, state } = req.query
