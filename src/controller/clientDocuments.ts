@@ -204,4 +204,48 @@ export class ClientDocumentsController {
             data: result,
         })
     }
+
+    static async updateFile(req: Request, res: Response) {
+        const { id } = req.params
+        const {
+            name,
+            url,
+            ext,
+            clientId,
+            description,
+            clientCompanyId,
+            organizationId,
+            fileFormId,
+        } = req.body
+
+        if (!id || !name) {
+            res.status(400).json({
+                error: 'Faltan datos',
+            })
+            return
+        }
+
+        const [error, result] = await ClientDocumentsModel.updateFile({
+            id,
+            name,
+            url,
+            ext,
+            clientId,
+            clientCompanyId,
+            fileFormId,
+            organizationId,
+            description: description ? description : '',
+        })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error al actualizar el archivo',
+            })
+            return
+        }
+
+        res.json({
+            data: result,
+        })
+    }
 }

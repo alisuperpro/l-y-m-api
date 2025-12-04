@@ -212,15 +212,19 @@ export class ClientDocumentsModel {
                     'url',
                     'client_documents.name as document_name',
                     'client_company.name as company_name',
+                    'client_company.id as company_id',
                     'organizations.name as organization_name',
+                    'organizations.id as organization_id',
                     'clients.name as client_name',
                     'clients.id as client_id',
                     'clients.username as client_username',
                     'employee.name as employee_name',
                     'employee.id as employee_id',
                     'file_form.name as file_form_name',
+                    'file_form.id as file_form_id',
                     'client_documents.id as document_id',
                     'client_documents.created_at as doc_created_at',
+                    'description',
                 ])
                 .join(
                     'file_form',
@@ -251,6 +255,58 @@ export class ClientDocumentsModel {
             })
 
             return [undefined, result.rows]
+        } catch (err) {
+            return [err]
+        }
+    }
+
+    static async updateFile({
+        id,
+        name,
+        url,
+        ext,
+        clientId,
+        clientCompanyId,
+        organizationId,
+        fileFormId,
+        description,
+    }: {
+        id: string
+        name: string
+        url: string
+        ext: string
+        clientId: string
+        clientCompanyId: string
+        organizationId: string
+        fileFormId: string
+        description: string
+    }) {
+        try {
+            const result = await db.execute({
+                sql: `UPDATE ${this.tableName}
+                SET name = ?,
+                url = ?,
+                ext = ?,
+                client_id = ?,
+                client_company_id = ?,
+                organization_id = ?,
+                file_form_id = ?,
+                description = ?
+                WHERE id = ?`,
+                args: [
+                    name,
+                    url,
+                    ext,
+                    clientId,
+                    clientCompanyId,
+                    organizationId,
+                    fileFormId,
+                    description,
+                    id,
+                ],
+            })
+
+            return [undefined, result]
         } catch (err) {
             return [err]
         }

@@ -248,10 +248,6 @@ export class PayController {
             return
         }
 
-        appEventEmitter.emit('payApproved', {
-            ...payResult,
-        })
-
         const debtCurrency = debtResult.currency_id
         //@ts-ignore
         const payCurrency = result.currency_id
@@ -277,6 +273,9 @@ export class PayController {
                     amount: verifyAmount,
                 })
             }
+            appEventEmitter.emit('payApproved', {
+                ...payResult,
+            })
         } else {
             const response = await fetch(EnDivisasAPI_URL ?? '')
             const json = await response.json()
@@ -356,6 +355,10 @@ export class PayController {
                 })
             }
         }
+
+        appEventEmitter.emit('payApproved', {
+            ...payResult,
+        })
 
         res.json({
             data: payResult,

@@ -68,3 +68,11 @@ clientDocumentsRouter.post(
     auth,
     ClientDocumentsController.add
 )
+
+clientDocumentsRouter.put(
+    '/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientDocumentsController.updateFile
+)
