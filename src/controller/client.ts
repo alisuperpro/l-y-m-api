@@ -82,7 +82,6 @@ export class ClientController {
         const created_at = new Date().toISOString()
 
         const password = generatePassword()
-        console.log(password)
 
         const saltRounds = 10 // SaltRound to encrypt password
         // const salt = await genSalt(saltRounds); // Generate Salt
@@ -143,7 +142,6 @@ export class ClientController {
         }
 
         const [clientError, result] = await ClientModel.findClientById({ id })
-        console.log(result)
 
         if (result === undefined) {
             res.status(404).json({
