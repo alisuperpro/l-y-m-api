@@ -42,7 +42,7 @@ export class ClientDocumentsController {
 
         const createdAt = new Date().toISOString()
         const [err, result] = await ClientDocumentsModel.add({
-            name,
+            name: name.replaceAll(' ', '-').replaceAll('%', ''),
             ext,
             url,
             createdBy,
