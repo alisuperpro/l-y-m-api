@@ -40,7 +40,7 @@ export class ClientModel {
                     email,
                     created_at,
                     createdBy,
-                    avatar,
+                    avatar ? avatar : 'null',
                     accountState,
                     roleId,
                 ],

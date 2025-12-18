@@ -311,4 +311,17 @@ export class ClientDocumentsModel {
             return [err]
         }
     }
+
+    static async deleteFile({ id }: { id: string }) {
+        try {
+            await db.execute({
+                sql: `DELETE FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+
+            return [undefined, true]
+        } catch (err) {
+            return [err]
+        }
+    }
 }

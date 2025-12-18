@@ -76,3 +76,11 @@ clientDocumentsRouter.put(
     auth,
     ClientDocumentsController.updateFile
 )
+
+clientDocumentsRouter.delete(
+    '/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    ClientDocumentsController.deleteFile
+)

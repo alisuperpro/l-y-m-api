@@ -63,6 +63,7 @@ export class DebtController {
             description: result.debt_description,
             createdAt: result.debt_created_at,
             expireIn: 'La deuda expira a los 30 dias de la creacion',
+            currencyId,
         })
 
         res.json({
@@ -297,6 +298,71 @@ export class DebtController {
 
         res.json({
             data: result,
+        })
+    }
+
+    static async updateDebt(req: Request, res: Response) {
+        const { id } = req.params
+        const { clientId, amount, currency, description } = req.body
+
+        if (!id) {
+            res.status(400).json({
+                error: 'Falta el id',
+            })
+            return
+        }
+
+        if (!clientId || !amount || !currency) {
+            res.status(400).json({
+                error: 'Faltan datos',
+            })
+            return
+        }
+
+        const [error, debt] = await DebtModel.updateDebt({
+            id,
+            amount,
+            clientId,
+            currency,
+            description: description ? description : null,
+        })
+        console.log({
+            error,
+        })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error to update debt',
+            })
+            return
+        }
+
+        res.json({
+            data: debt,
+        })
+    }
+
+    static async deleteDebt(req: Request, res: Response) {
+        const { id } = req.params
+
+        if (!id) {
+            res.status(400).json({
+                error: 'Falta el id',
+            })
+            return
+        }
+
+        const [error, debt] = await DebtModel.deleteDebt({ id })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error to delete debt',
+            })
+            return
+        }
+
+        res.json({
+            data: 'Deleted',
         })
     }
 }

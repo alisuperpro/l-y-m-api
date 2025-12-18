@@ -100,6 +100,7 @@ export class DebtModel {
                     'd.created_at AS debt_created_at',
                     'c.name AS client_name',
                     'c.avatar AS client_avatar',
+                    'c.id AS client_id',
                     'e.name AS created_by_employee_name',
                     's.state AS debt_status',
                     'currency.long_name',
@@ -473,6 +474,36 @@ export class DebtModel {
         }
     }
 
+    static async updateDebt({
+        id,
+        amount,
+        clientId,
+        currency,
+        description,
+    }: {
+        id: string
+        amount: string
+        clientId: string
+        currency: string
+        description: string
+    }) {
+        try {
+            await db.execute({
+                sql: `UPDATE ${this.tableName} SET amount = ?, currency = ?, description = ?, client_id = ? WHERE id = ?`,
+                args: [amount, currency, description, clientId, id],
+            })
+
+            const result = await db.execute({
+                sql: `SELECT * FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+
+            return [undefined, result.rows[0]]
+        } catch (err: any) {
+            return [err]
+        }
+    }
+
     static async countAllDebtsByState({ state }: { state: string }) {
         try {
             const result = await db.execute({
@@ -481,6 +512,19 @@ export class DebtModel {
             })
 
             return [undefined, result.rows]
+        } catch (err) {
+            return [err]
+        }
+    }
+
+    static async deleteDebt({ id }: { id: string }) {
+        try {
+            await db.execute({
+                sql: `DELETE FROM ${this.tableName} WHERE id = ?`,
+                args: [id],
+            })
+
+            return [undefined, true]
         } catch (err) {
             return [err]
         }

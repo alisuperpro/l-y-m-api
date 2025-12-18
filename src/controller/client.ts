@@ -103,7 +103,7 @@ export class ClientController {
                 email,
                 created_at,
                 createdBy: user.id,
-                avatar,
+                avatar: avatar ? avatar : null,
                 //@ts-ignore
                 accountState: stateResult.id,
                 roleId: roleResult.id,

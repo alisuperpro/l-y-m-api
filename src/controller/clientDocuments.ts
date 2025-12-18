@@ -248,4 +248,28 @@ export class ClientDocumentsController {
             data: result,
         })
     }
+
+    static async deleteFile(req: Request, res: Response) {
+        const { id } = req.params
+
+        if (!id) {
+            res.status(400).json({
+                error: 'Error falta el id',
+            })
+            return
+        }
+
+        const [error, file] = await ClientDocumentsModel.deleteFile({ id })
+
+        if (error) {
+            res.status(500).json({
+                error: 'Error to delete file',
+            })
+            return
+        }
+
+        res.json({
+            data: 'Deleted',
+        })
+    }
 }

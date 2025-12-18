@@ -1,6 +1,7 @@
 import { BUSSINES_DATA } from '../const/const'
 import { ClientModel } from '../models/client'
 import { ClientCompanyModel } from '../models/clientCompany'
+import { CurrencyModel } from '../models/currency'
 import { OrganizationsModel } from '../models/organizations'
 import { StatesModel } from '../models/states'
 import { sendEmail } from '../services/email.services'
@@ -358,11 +359,27 @@ export function setupEmailService() {
             id: data.status,
         })
 
+        const [clientError, client] = await ClientModel.findClientById({
+            id: data.clientId,
+        })
+        if (clientError) {
+            console.log('Error cliente no encontrado')
+            return
+        }
+
         if (statusError) {
             console.log('Error estado no encontrado')
             return
         }
 
+        const [currencyError, currency] = await CurrencyModel.getById({
+            id: data.currencyId,
+        })
+
+        if (currencyError) {
+            console.log('Error moneda no encontrado')
+            return
+        }
         const template = templates.debtCreated
             .replace('[Nombre del Usuario]', data.client_name)
             .replace('[Número de Deuda]', data.debtId)
@@ -371,7 +388,8 @@ export function setupEmailService() {
                 data.description ?? 'Sin concepto'
             )
             .replace('[Monto de la Deuda]', data.amount)
-            .replace('[Moneda]', '$')
+            //@ts-ignore
+            .replace('[Moneda]', currency.short_name)
             .replace(
                 '[Fecha de Creacion]',
                 new Date(data.createdAt).toLocaleDateString('es-ES')
@@ -391,7 +409,7 @@ export function setupEmailService() {
 
         try {
             await sendEmail({
-                to: data.email,
+                to: client.client.email,
                 subject: 'Soluciones L y M - Soporte, Nueva Deuda Creada',
                 body: template,
             })

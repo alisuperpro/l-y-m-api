@@ -71,3 +71,19 @@ debtRouter.put(
     auth,
     DebtController.updateStatus
 )
+
+debtRouter.put(
+    '/:id/updateDebt',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.updateDebt
+)
+
+debtRouter.delete(
+    '/:id',
+    verifyToken,
+    setRoutePermission.loadRoutePermission,
+    auth,
+    DebtController.deleteDebt
+)
