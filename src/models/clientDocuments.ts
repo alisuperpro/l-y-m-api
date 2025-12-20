@@ -198,10 +198,12 @@ export class ClientDocumentsModel {
         org,
         slug,
         clientId,
+        createdAt,
     }: {
         org: string
         slug: string
         clientId?: string
+        createdAt?: string
     }) {
         try {
             const builder = new QueryBuilder(this.tableName)
@@ -247,6 +249,10 @@ export class ClientDocumentsModel {
 
             if (clientId) {
                 builder.where('client_documents.client_id', clientId)
+            }
+
+            if (createdAt) {
+                builder.where('client_documents.created_at', createdAt, '>=')
             }
 
             const result = await db.execute({
