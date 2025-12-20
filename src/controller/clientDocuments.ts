@@ -171,7 +171,7 @@ export class ClientDocumentsController {
 
     static async getByOrgAndSlug(req: Request, res: Response) {
         const { org, slug } = req.params
-        const { clientId, createdAt } = req.query
+        const { clientId, createdAt, ext, clientCompanyId } = req.query
 
         if (!org || !slug) {
             res.status(400).json({
@@ -185,6 +185,8 @@ export class ClientDocumentsController {
             slug,
             clientId: clientId?.toString() ?? undefined,
             createdAt: createdAt?.toString() ?? undefined,
+            ext: ext?.toString() ?? undefined,
+            clientCompany: clientCompanyId?.toString() ?? undefined,
         })
 
         if (error) {

@@ -1,6 +1,7 @@
 import { db } from '../db/db'
 import { randomUUID } from 'node:crypto'
 import { QueryBuilder } from './queryBuilder'
+import { id } from 'zod/v4/locales/index.cjs'
 
 export class ClientDocumentsModel {
     static tableName = 'client_documents'
@@ -199,11 +200,15 @@ export class ClientDocumentsModel {
         slug,
         clientId,
         createdAt,
+        ext,
+        clientCompany,
     }: {
         org: string
         slug: string
         clientId?: string
         createdAt?: string
+        ext?: string
+        clientCompany?: string
     }) {
         try {
             const builder = new QueryBuilder(this.tableName)
@@ -253,6 +258,17 @@ export class ClientDocumentsModel {
 
             if (createdAt) {
                 builder.where('client_documents.created_at', createdAt, '>=')
+            }
+
+            if (ext) {
+                builder.where('client_documents.ext', ext)
+            }
+
+            if (clientCompany) {
+                builder.where(
+                    'client_documents.client_company_id',
+                    clientCompany
+                )
             }
 
             const result = await db.execute({
