@@ -16,6 +16,7 @@ export class ClientDocumentsController {
             clientCompanyId,
             organizationId,
             fileFormId,
+            createdAt,
         } = req.body
         const { error } = nameSchema.safeParse(name)
         if (error) {
@@ -40,14 +41,14 @@ export class ClientDocumentsController {
             return
         }
 
-        const createdAt = new Date().toISOString()
+        // const createdAt = new Date().toISOString()
         const [err, result] = await ClientDocumentsModel.add({
             name: name.replaceAll(' ', '-').replaceAll('%', ''),
             ext,
             url,
             createdBy,
             clientId,
-            createdAt,
+            createdAt: createdAt ? createdAt : new Date().toISOString(),
             description,
             clientCompanyId,
             organizationId,
